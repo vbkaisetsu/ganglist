@@ -343,6 +343,10 @@ class System:
 				if self.__redraw:
 					self.__draw()
 			except curses.error:
+				# when resizing occured with drawing the screen,
+				# the program throws this error.
+				# since the screen will be refreshed when receiving next KEY_RESIZE message,
+				# this error may be ignored.
 				pass
 			
 			self.__firstloop = False
