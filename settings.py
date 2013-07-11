@@ -19,10 +19,10 @@ class Options:
 
 class Environment:
 	# data directory
-	DATADIR = '/project/nakamura/lab01/ganglist'
+	DATADIR = '/project/nakamura-lab01/ganglist'
 
 	# host list
-	hosts = [
+	HOSTS = [
 		"ahcclust01.naist.jp", "ahcclust02.naist.jp", "ahcclust03.naist.jp",
 		"ahcclust04.naist.jp", "ahcclust05.naist.jp", "ahcclust06.naist.jp",
 		"ahcclust07.naist.jp", "ahcclust08.naist.jp", "ahcclust09.naist.jp",
