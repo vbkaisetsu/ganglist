@@ -4,6 +4,7 @@
 #
 
 from settings import Options
+import utils
 from utils import Utils
 import system
 
@@ -71,114 +72,7 @@ def run():
 		return
 
 	if options.neubig:
-		Neubig.main()
+		utils.Neubig.main()
 	else:
 		system.main(options)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class Neubig:
-	def main():
-		print('''
-              .i   l,
-             ;f G@@GGCG@@@@.,,
-             C; Lff@@G@G@tG;@f
-         tLGGLL@@Gi;lGfl@@@@,L;
-        t@ftG@CGL;    tit..tfC@,
-       t@,iCff l              GG.
-    .ttGCf@@G.                 ;it
-   fGt;@C@GG:                    C;
-  tl@,;@@G,L                     ,ft
- ;CGCf@@@Gti                   .tflf;
- ff@llC@G@l                  fC@@GC.f:
-;t@@lClGL;                   .@C;    G
-C@@@l.G@t          ,iiii     ::  .   .C
-Lf@L:C@Gi      :;lfCCflfi       ;@ftt f.
-f:C t@@Gi     ,@@@G@@   ft      t@GC@ ,G
-ifC l@G@,    .Cf:.       it     ,;;;,  ;l
- ;G,:@Cf     iG    .:LG;, lC;.          f;
- tt@;L fl         .@CG@l     :llG        il
- C lCftL@L,       .@LG;         l:        C;
- ,LLGt  tC@Gi       .           ii   :;    ti
-   ;G.    ;G@G,             LfG@@  tG@C     C
-    C      :C:.                 lGG::.@C.   L
-    L.      L;              ,,ttt,i   ;CG; :G;
-    it       C.            ;GG@G   l@@C C@ C@l
-     if      ,li           :;;:, ;fl.,. .lGGt
-      fl      .G:           L:  ,G:     .,:G
-       .G;      tfC., ,,    fC.t        Ct@.
-        .tCfi;;;i@@G@GCG;fLf@@GL      .CLC.
-              .   ,C@@Gtilft;iCGG.tt,lGt,
-                    ,lC@@@@@@@G@G@@G@G,
-                       ...  .lLCf.
-                               ,.
-''')
-
 
