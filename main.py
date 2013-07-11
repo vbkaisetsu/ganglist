@@ -4,6 +4,7 @@
 #
 
 from settings import Options
+import system
 
 
 def perror(text):
@@ -69,6 +70,5 @@ def run():
 	if not checkOptions(options):
 		return
 
-	print(options)
-	print(args)
+	system.main(options)
 
