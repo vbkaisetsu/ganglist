@@ -9,6 +9,7 @@ from datetime import datetime
 import time
 from xml.etree import ElementTree
 from settings import Environment as Env
+from utils import Utils
 
 
 def getprocdata(filename):
@@ -21,20 +22,6 @@ def getprocdata(filename):
 	return lst
 
 
-def safeInt(val):
-	try:
-		return int(val)
-	except ValueError:
-		return -1
-
-
-def safeFloat(val):
-	try:
-		return float(val)
-	except ValueError:
-		return -1
-
-
 # parse xml files dumped from rrds
 def getRRD(filename):
 	tree = ElementTree.parse(filename)
@@ -44,7 +31,7 @@ def getRRD(filename):
 	dataset = {}
 	for e in elem.findall(".//rra"):
 		step = int(e.find(".//pdp_per_row").text) * rootstep
-		dataset.update({lastupdate - i * step: safeFloat(val.text) for i, val in enumerate(reversed(e.findall(".//v")))})
+		dataset.update({lastupdate - i * step: Utils.safeFloat(val.text) for i, val in enumerate(reversed(e.findall(".//v")))})
 	return sorted(dataset.items(), key=lambda x: x[0])
 
 
@@ -225,8 +212,8 @@ def run(window):
 				window.addstr(h - 1, 0, "Loading ...                                     ")
 				window.refresh()
 				try:
-					cpu_num[m] = safeInt(getRRD("%s/%s/cpu_num.rrd" % (Env.DATADIR, m))[-1][1])
-					cpu_speed[m] = safeFloat(getRRD("%s/%s/cpu_speed.rrd" % (Env.DATADIR, m))[-1][1])
+					cpu_num[m] = Utils.safeInt(getRRD("%s/%s/cpu_num.rrd" % (Env.DATADIR, m))[-1][1])
+					cpu_speed[m] = Utils.safeFloat(getRRD("%s/%s/cpu_speed.rrd" % (Env.DATADIR, m))[-1][1])
 					cpu_user[m] = getRRD("%s/%s/cpu_user.rrd" % (Env.DATADIR, m))
 					cpu_system[m] = getRRD("%s/%s/cpu_system.rrd" % (Env.DATADIR, m))
 
