@@ -6,7 +6,7 @@
 from settings import Options
 import utils
 from utils import Utils
-import system
+from system import System
 
 
 # parse options
@@ -74,5 +74,6 @@ def run():
 	if options.neubig:
 		utils.Neubig.main()
 	else:
-		system.main(options)
+		sys = System(options)
+		sys.run()
 
