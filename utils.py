@@ -30,7 +30,10 @@ class Utils:
 			return -1.0
 
 
+# He is our cool master
+# Please read the following code as a document.
 class Neubig:
+
 	logo_right = [
 		'               .i   l,                          ',
 		'  ;G,:@Cf     iG    .:LG;, lC;.          f;     ',
@@ -113,6 +116,7 @@ class Neubig:
 			array[k] = data[i]
 		return array
 
+
 	def main():
 		import curses, random, math
 		
@@ -123,8 +127,9 @@ class Neubig:
 		
 		window = curses.initscr() 
 		curses.noecho()
-		curses.cbreak()
 		window.keypad(1)
+		curses.cbreak()
+		curses.raw()
 
 		window.timeout(20)
 
@@ -140,8 +145,8 @@ class Neubig:
 
 		while True:
 			thr = 0.5 * (1 - math.exp(-tau * t))
-			pressedkey = window.getch();
-			if pressedkey == curses.KEY_RESIZE:
+			key = window.getch();
+			if key == curses.KEY_RESIZE:
 				h, w = window.getmaxyx()
 				y = int((h - 33) / 2)
 				if y < 0:
@@ -157,7 +162,6 @@ class Neubig:
 					window.addstr(y + i, x, line[0:w-x])
 
 			if 0 <= x and x < w - 47:
-
 				t += 1
 				rnd = random.random()
 				if state == 0:
@@ -188,6 +192,7 @@ class Neubig:
 
 			window.move(h - 1, 0)
 
+		curses.noraw()
 		curses.nocbreak()
 		window.keypad(0)
 		curses.echo()

@@ -61,6 +61,7 @@ class System:
 		self.__window = curses.initscr()
 		curses.noecho()
 		curses.cbreak()
+		curses.raw()
 		self.__window.keypad(1)
 		self.__window.timeout(10)
 
@@ -90,8 +91,9 @@ class System:
 	
 
 	def __final(self):
-		curses.nocbreak()
 		self.__window.keypad(0)
+		curses.noraw()
+		curses.nocbreak()
 		curses.echo()
 		curses.endwin()
 	
