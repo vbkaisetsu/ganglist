@@ -4,12 +4,8 @@
 #
 
 from settings import Options
+from utils import Utils
 import system
-
-
-def perror(text):
-	import sys
-	sys.stderr.write('ERROR: '+text+'\n')
 
 
 # parse options
@@ -58,7 +54,7 @@ def checkOptions(options):
 		assertRange(options, 'width', Options.MIN_WIDTH, Options.MAX_WIDTH)
 		assertRange(options, 'height', Options.MIN_HEIGHT, Options.MAX_HEIGHT)
 	except ValueError as e:
-		perror(str(e))
+		Utils.perror(str(e))
 		return False
 	
 	return True
