@@ -1,4 +1,4 @@
-# -*- coding: utf-8; indent-tabs-mode: t; tab-width: 4 -*-
+#-*- coding: utf-8; indent-tabs-mode: t; tab-width: 4 -*-
 #
 # system.py
 #
@@ -14,6 +14,22 @@ from utils import Utils
 
 class System:
 	
+
+	@staticmethod
+	def __timeScaleToStep(timescale):
+		if timescale == 0:
+			return 60 # 30 mins
+		elif timescale == 1:
+			return 240 # 2 hours
+		elif timescale == 2:
+			return 1440 # 12 hours
+		elif timescale == 3:
+			return 11520 # 4 days
+		elif timescale == 4:
+			return 86400 # 30 days
+		else:
+			raise ValueError
+			
 
 	@staticmethod
 	def __getProcData(filename):
@@ -100,6 +116,16 @@ class System:
 		curses.endwin()
 
 
+	def __printFooter(self, text):
+		self.__window.addstr(self.__h - 1, 0, ' ' * (self.__w - 1))
+		self.__window.addstr(self.__h - 1, 1, text)
+	
+
+	def __refresh(self):
+		self.__window.move(self.__h - 1, 0)
+		self.__window.refresh()
+
+
 	# get machines per page
 	def __initPage(self):
 		i = 0
@@ -169,8 +195,8 @@ class System:
 	def __elapse(self):
 		if self.__timer == 0:
 			for m in Env.HOSTS:
-				self.__window.addstr(self.__h - 1, 1, "Loading ...                                     "[:self.__w - 1])
-				self.__window.refresh()
+				self.__printFooter("Loading ...")
+				self.__refresh()
 				try:
 					self.__cpu_num[m] = Utils.safeInt(System.__getRRD("%s/%s/cpu_num.rrd" % (Env.DATADIR, m))[-1][1])
 					self.__cpu_speed[m] = Utils.safeFloat(System.__getRRD("%s/%s/cpu_speed.rrd" % (Env.DATADIR, m))[-1][1])
@@ -275,13 +301,16 @@ class System:
 				for i in range(self.__chart_h):
 					self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, "?")
 				continue
+
 			val1 /= total
 			val2 = val1 + (val2 + val3) / total
 			
 			for i in range(self.__chart_h):
-				if val2 >= i / self.__chart_h:  self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, ".")
+				if val2 >= i / self.__chart_h:
+					self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, ".")
 			for i in range(self.__chart_h):
-				if val1 >= i / self.__chart_h:  self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, " ")
+				if val1 >= i / self.__chart_h:
+					self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, " ")
 	
 		i = 0
 		
@@ -293,57 +322,60 @@ class System:
 				s = " ".join(mu)
 				self.__window.addstr(y + self.__chart_h + 4 + i, x + self.__chart_w + 3, s[:self.__chart_w - 2])
 				i += 1
+
 	
-		return current - j * step, current
+	def __drawBoxes(self, now, step):
+		needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
+		needed_w = self.__chart_w * 2 + 3
+		
+		hn = self.__mpp * self.__page
+		
+		for starty in range(0, self.__h - needed_h - 1, needed_h):
+			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
+				hostname = Env.HOSTS[hn]
+
+				self.__window.addstr(starty + 0, startx, " " * needed_w)
+				self.__window.addstr(starty + 0, startx + int((needed_w - len(hostname)) / 2), hostname)
+
+				step = System.__timeScaleToStep(self.__timescale)
+
+				# each statuses
+				self.__drawStatus(startx, starty, now, step, hostname)
+				
+				hn += 1
+				if hn == len(Env.HOSTS):
+					break
+
+			if hn == len(Env.HOSTS):
+				break
+
+		uy = starty + self.__chart_h + (3 if self.__showusers else 0) + 5
+		self.__window.addstr(uy, 1, "[ # ] user  [ @ ] sys")
+		self.__window.addstr(uy, self.__chart_w + 2, "[ # ] user  [ . ] cache/buff")
+	
+
+	def __drawInlines(self, now, step):
+		self.__window.addstr(0, 0, 'Sorry, this option is not implemented yet.');
 
 	
 	def __draw(self):
 		self.__window.erase()
-		i = self.__mpp * self.__page
-		starttime = 0
-		endtime = 0
+
 		now = int(time.mktime(datetime.now().timetuple()))
 		now -= now % 60
+		step = System.__timeScaleToStep(self.__timescale)
+		endtime = now - step * (self.__chart_w - 1)
 		
-		needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
-		needed_w = self.__chart_w * 2 + 3
+		if self.__options.inline:
+			self.__drawInlines(now, step)
+		else:
+			self.__drawBoxes(now, step)
 		
-		for starty in range(0, self.__h - needed_h - 1, needed_h):
-			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
-				hostname = Env.HOSTS[i]
-
-				self.__window.addstr(starty + 0, startx, "".join([" "] * needed_w))
-				self.__window.addstr(starty + 0, startx + int((needed_w - len(hostname)) / 2), hostname)
-
-				if self.__timescale == 0:
-					step = 60 # 30 mins
-				elif self.__timescale == 1:
-					step = 240 # 2 hours
-				elif self.__timescale == 2:
-					step = 1440 # 12 hours
-				elif self.__timescale == 3:
-					step = 11520 # 4 days
-				else:
-					step = 86400 # 30 days
-
-				# each statuses
-				starttime, endtime = self.__drawStatus(startx, starty, now, step, hostname)
-				
-				i += 1
-				if i == len(Env.HOSTS):
-					break
-
-			if i == len(Env.HOSTS):
-				break
-
-		starttimestr = datetime.fromtimestamp(starttime).strftime('%Y-%m-%d %H:%M:%S')
+		starttimestr = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
 		endtimestr = datetime.fromtimestamp(endtime).strftime('%Y-%m-%d %H:%M:%S')
-		self.__window.addstr(starty + self.__chart_h + (3 if self.__showusers else 0) + 5, 1, "[ # ] user  [ @ ] sys")
-		self.__window.addstr(starty + self.__chart_h + (3 if self.__showusers else 0) + 5, self.__chart_w + 2, "[ # ] user  [ . ] cache/buff")
-		self.__window.addstr(self.__h - 1, 1, "%s - %s" % (starttimestr, endtimestr))
 
-		self.__window.refresh()
-		self.__window.move(self.__h - 1, 0)
+		self.__printFooter("%s - %s" % (starttimestr, endtimestr))
+		self.__refresh()
 
 
 	def __mainloop(self):
@@ -367,10 +399,10 @@ class System:
 				# update
 				if not self.__elapse():
 					return
-				
 				# redraw
 				if self.__redraw:
 					self.__draw()
+
 			except curses.error:
 				# when resizing occured with drawing the screen,
 				# the program throws this error.
