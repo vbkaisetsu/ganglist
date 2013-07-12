@@ -8,6 +8,7 @@ class Utils:
 
 
 	# print error message.
+	@staticmethod
 	def perror(text):
 		import sys
 		sys.stderr.write('ERROR: '+text+'\n')
@@ -15,6 +16,7 @@ class Utils:
 
 	# convert some data into corresponding integer value
 	# or -1 if cannot.
+	@staticmethod
 	def safeInt(data):
 		try:
 			return int(data)
@@ -23,6 +25,7 @@ class Utils:
 
 	# convert some data into corresponding float value
 	# or -1.0 if cannot.
+	@staticmethod
 	def safeFloat(data):
 		try:
 			return float(data)
