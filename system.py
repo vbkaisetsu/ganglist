@@ -159,9 +159,13 @@ class System:
 	def __keystroke(self):
 		key = self.__window.getch();
 
-		# Q: Quit
-		if key == ord("q"):
+		# Q: quit
+		if key == ord('q'):
 			return False
+
+		# U: force update
+		if key == ord('u'):
+			self.__timer = 0
 		
 		# Resize
 		elif key == curses.KEY_RESIZE:
