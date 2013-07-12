@@ -26,6 +26,10 @@ This GangList has my master's powers.
 		default=str(Options.DEFAULT_HEIGHT),
 		help='graph height (default: %d)' % Options.DEFAULT_HEIGHT,
 		metavar='<INT>')
+	q.add_option('-t', '--interval', dest='interval',
+		default=str(Options.DEFAULT_INTERVAL),
+		help='update interval [seconds] (default: %d)' % Options.DEFAULT_INTERVAL,
+		metavar='<INT>')
 	q.add_option('-u', '--withusers', action="store_true", dest='showusers',
 		default=bool(Options.DEFAULT_SHOWUSERS),
 		help='enable user list explicitly')
@@ -35,10 +39,9 @@ This GangList has my master's powers.
 	q.add_option('-l', '--inline', action='store_true', dest='inline',
 		default=bool(Options.DEFAULT_INLINE),
 		help='inline view')
-	q.add_option('-t', '--interval', dest='interval',
-		default=str(Options.DEFAULT_INTERVAL),
-		help='update interval [seconds] (default: %d)' % Options.DEFAULT_INTERVAL,
-		metavar='<INT>')
+	q.add_option('-c', '--color', action='store_true', dest='coloring',
+		default=bool(Options.DEFAULT_COLORING),
+		help='enable coloring')
 
 	# eggs
 	q.add_option('--neubig', dest='neubig',
@@ -80,6 +83,7 @@ def checkOptions(options):
 		forceInt(options, 'height')
 		forceInt(options, 'interval')
 		forceBool(options, 'showusers')
+		forceBool(options, 'coloring')
 		forceBool(options, 'neubig')
 		forceBool(options, 'right')
 		forceBool(options, 'walk')

@@ -10,6 +10,7 @@ class Options:
 	DEFAULT_INTERVAL = 60
 	DEFAULT_SHOWUSERS = True
 	DEFAULT_INLINE = False
+	DEFAULT_COLORING = False
 
 	# minimum values for command-line options
 	MIN_WIDTH = 1
