@@ -9,6 +9,10 @@ from utils import *
 from system import System
 
 
+def boolOptionStr(val):
+	return val and 'enabled' or 'disabled'
+
+
 # parse options
 def parseOptions():
 	from optparse import OptionParser, SUPPRESS_HELP
@@ -26,13 +30,13 @@ This GangList has my master's powers.
 		default=str(Options.DEFAULT_HEIGHT),
 		help='graph height (default: %d)' % Options.DEFAULT_HEIGHT,
 		metavar='<INT>')
-	q.add_option('-U', '--withusers', action="store_true", dest='showusers',
+	q.add_option('-u', '--withusers', action="store_true", dest='showusers',
 		default=bool(Options.DEFAULT_SHOWUSERS),
-		help='enable user list (default: %s)' % str(Options.DEFAULT_SHOWUSERS))
-	q.add_option('-N', '--nouser', action="store_false", dest='showusers',
+		help='enable user list explicitly')
+	q.add_option('-n', '--nouser', action="store_false", dest='showusers',
 		default=bool(Options.DEFAULT_SHOWUSERS),
-		help='disable user list (default: %s)' % str(not Options.DEFAULT_SHOWUSERS))
-	
+		help='disable user list explicitly')
+
 	# eggs
 	q.add_option('--neubig', dest='neubig',
 		action='store_true', default=False, help=SUPPRESS_HELP)
