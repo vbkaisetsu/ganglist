@@ -9,10 +9,6 @@ from utils import *
 from system import System
 
 
-def boolOptionStr(val):
-	return val and 'enabled' or 'disabled'
-
-
 # parse options
 def parseOptions():
 	from optparse import OptionParser, SUPPRESS_HELP
