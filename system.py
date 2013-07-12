@@ -393,18 +393,18 @@ class System:
 		now = int(time.mktime(datetime.now().timetuple()))
 		now -= now % 60
 		step = System.__timeScaleToStep(self.__timescale)
-		endtime = now - step * (self.__chart_w - 1)
+		start = now - step * (self.__chart_w - 1)
 		
 		if self.__options.inline:
 			self.__drawInlines(now, step)
 		else:
 			self.__drawBoxes(now, step)
 		
-		starttimestr = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
-		endtimestr = datetime.fromtimestamp(endtime).strftime('%Y-%m-%d %H:%M:%S')
+		startstr = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
+		nowstr = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
 		stepstr = System.__stepToStr(step)
 
-		self.__printFooter("%s - %s (%s)" % (starttimestr, endtimestr, stepstr))
+		self.__printFooter("%s - %s (%s)" % (startstr, nowstr, stepstr))
 		self.__refresh()
 
 
