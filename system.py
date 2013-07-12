@@ -55,6 +55,10 @@ class System:
 
 	def __init__(self, options):
 		self.__options = options
+		
+		self.__chart_h = self.__options.height
+		self.__chart_w = self.__options.width
+		self.__showusers = self.__options.showusers
 	
 
 	def __initial(self):
@@ -88,10 +92,6 @@ class System:
 		self.__h = 0
 		self.__w = 0
 
-		self.__chart_h = self.__options.height
-		self.__chart_w = self.__options.width
-		self.__showusers = self.__options.showusers
-
 
 	def __final(self):
 		self.__window.keypad(0)
@@ -99,6 +99,33 @@ class System:
 		curses.nocbreak()
 		curses.echo()
 		curses.endwin()
+
+
+	# get machines per page
+	def __initPage(self):
+		i = 0
+		self.__h, self.__w = self.__window.getmaxyx()
+		
+		needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
+		needed_w = self.__chart_w * 2 + 3
+		
+		if self.__h < needed_h + 2 or self.__w < needed_w:
+			return False
+
+		for starty in range(0, self.__h - needed_h + 1, needed_h):
+			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
+				i += 1
+				if i == len(Env.HOSTS):
+					break
+			if i == len(Env.HOSTS):
+				break
+
+		if self.__mpp != i:
+			self.__mpp = i
+			self.__page = 0
+		self.__redraw = True
+
+		return True
 	
 
 	def __keystroke(self):
@@ -110,38 +137,18 @@ class System:
 		
 		# Resize
 		elif key == curses.KEY_RESIZE or self.__firstloop:
-			# get machines per page
-			i = 0
-			self.__h, self.__w = self.__window.getmaxyx()
-			
-			needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
-			needed_w = self.__chart_w * 2 + 3
-			
-			if self.__h < needed_h + 2 or self.__w < needed_w:
+			if not self.__initPage():
 				return False
-			for starty in range(0, self.__h - needed_h + 1, needed_h):
-				for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
-					i += 1
-					if i == len(Env.HOSTS):
-						break
-				if i == len(Env.HOSTS):
-					break
-			if self.__mpp != i:
-				self.__mpp = i
-				self.__page = 0
-			self.__redraw = True
-
+			
 		# Down: next page
 		elif key == curses.KEY_DOWN:
-			self.__page += 1
-			if len(Env.HOSTS) <= self.__mpp * self.__page:
-				self.__page -= 1
-			else:
+			if self.__mpp * (self.__page + 1) < len(Env.HOSTS):
+				self.__page += 1
 				self.__redraw = True
 
 		# Up: previous page
 		elif key == curses.KEY_UP:
-			if self.__page != 0:
+			if self.__page > 0:
 				self.__page -= 1
 				self.__redraw = True
 
@@ -153,7 +160,7 @@ class System:
 
 		# Right: zoom-in
 		elif key == curses.KEY_RIGHT:
-			if self.__timescale != 0:
+			if self.__timescale > 0:
 				self.__timescale -= 1
 				self.__redraw = True
 
