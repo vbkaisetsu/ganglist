@@ -147,10 +147,8 @@ class System:
 
 		# Left: zoom-out
 		elif key == curses.KEY_LEFT:
-			self.__timescale += 1
-			if self.__timescale > 4:
-				self.__timescale -= 1
-			else:
+			if self.__timescale < 4:
+				self.__timescale += 1
 				self.__redraw = True
 
 		# Right: zoom-in
