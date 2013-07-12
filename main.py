@@ -58,11 +58,14 @@ This GangList has my master's powers.
 # assert options and convert data type if necessary
 def checkOptions(options):
 
-	def forceInteger(options, name):
+	def forceInt(options, name):
 		val = getattr(options, name)
 		if not val.isdigit():
 			raise ValueError('Option "%s" must be integer.' % name)
 		setattr(options, name, int(val))
+	
+	def forceBool(options, name):
+		setattr(options, name, bool(getattr(options, name)))
 
 	def assertRange(options, name, minval, maxval):
 		val = getattr(options, name)
@@ -70,8 +73,12 @@ def checkOptions(options):
 			raise ValueError('Option "%s" must be: %d <= %s <= %d.' % (name, minval, name, maxval))
 	
 	try:
-		forceInteger(options, 'width')
-		forceInteger(options, 'height')
+		forceInt(options, 'width')
+		forceInt(options, 'height')
+		forceBool(options, 'showusers')
+		forceBool(options, 'neubig')
+		forceBool(options, 'right')
+		forceBool(options, 'walk')
 		assertRange(options, 'width', Options.MIN_WIDTH, Options.MAX_WIDTH)
 		assertRange(options, 'height', Options.MIN_HEIGHT, Options.MAX_HEIGHT)
 	except ValueError as e:
