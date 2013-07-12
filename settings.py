@@ -7,6 +7,7 @@ class Options:
 	# default values for command-line options
 	DEFAULT_WIDTH = 30
 	DEFAULT_HEIGHT = 5
+	DEFAULT_SHOWUSERS = True
 
 	# minimum values for command-line options
 	MIN_WIDTH = 1

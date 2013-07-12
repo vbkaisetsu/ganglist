@@ -11,7 +11,7 @@ from system import System
 
 # parse options
 def parseOptions():
-	from optparse import OptionParser
+	from optparse import OptionParser, SUPPRESS_HELP
 
 	q = OptionParser()
 
@@ -24,10 +24,16 @@ def parseOptions():
 		default=str(Options.DEFAULT_HEIGHT),
 		help='graph height (default: %d)' % Options.DEFAULT_HEIGHT,
 		metavar='<INT>')
+	q.add_option('-U', '--withusers', action="store_true", dest='showusers',
+		default=bool(Options.DEFAULT_SHOWUSERS),
+		help='enable user list (default: %s)' % str(Options.DEFAULT_SHOWUSERS))
+	q.add_option('-N', '--nouser', action="store_false", dest='showusers',
+		default=bool(Options.DEFAULT_SHOWUSERS),
+		help='disable user list (default: %s)' % str(not Options.DEFAULT_SHOWUSERS))
 	
 	# eggs
 	q.add_option('--neubig', dest='neubig',
-		action='store_true', default=False)
+		action='store_true', default=False, help=SUPPRESS_HELP)
 	
 	# analyze
 	(options, args) = q.parse_args()

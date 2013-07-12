@@ -88,7 +88,10 @@ class System:
 		self.__h = 0
 		self.__w = 0
 
-	
+		self.__chart_h = self.__options.height
+		self.__chart_w = self.__options.width
+		self.__showusers = self.__options.showusers
+
 
 	def __final(self):
 		self.__window.keypad(0)
@@ -110,10 +113,14 @@ class System:
 			# get machines per page
 			i = 0
 			self.__h, self.__w = self.__window.getmaxyx()
-			if self.__h < 15 or self.__w < 63:
+			
+			needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
+			needed_w = self.__chart_w * 2 + 3
+			
+			if self.__h < needed_h + 2 or self.__w < needed_w:
 				return False
-			for starty in range(0, self.__h - 14, 13):
-				for startx in range(0, self.__w - 62, 64):
+			for starty in range(0, self.__h - needed_h + 1, needed_h):
+				for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
 					i += 1
 					if i == len(Env.HOSTS):
 						break
@@ -158,7 +165,7 @@ class System:
 	def __elapse(self):
 		if self.__timer == 0:
 			for m in Env.HOSTS:
-				self.__window.addstr(self.__h - 1, 0, "Loading ...                                     ")
+				self.__window.addstr(self.__h - 1, 1, "Loading ...                                     "[:self.__w - 1])
 				self.__window.refresh()
 				try:
 					self.__cpu_num[m] = Utils.safeInt(System.__getRRD("%s/%s/cpu_num.rrd" % (Env.DATADIR, m))[-1][1])
@@ -203,84 +210,75 @@ class System:
 
 		cpu_title = "cpu (%d * %sHz)" % (cpu_num, (("%.1fG" % (cpu_speed / 1000)) if cpu_speed >= 1000 else ("%.1fM" % cpu_speed)))
 		mem_title = "mem (%siB)" % (("%.1fG" % (mem_total[-1][1] / 1024 / 1024)) if mem_total[-1][1] >= 1024 else ("%.1fM" % (mem_total[-1][1] / 1024)))
-		self.__window.addstr(y + 1, x, "                                                               ")
-		self.__window.addstr(y + 1, x + int((32 - len(cpu_title)) / 2), cpu_title)
-		self.__window.addstr(y + 1, x + 31 + int((32 - len(mem_title)) / 2), mem_title)
-		self.__window.addstr(y + 2, x, "|------------------------------|------------------------------|")
-		self.__window.addstr(y + 3, x, "|                              |##############################|")
-		self.__window.addstr(y + 4, x, "|                              |##############################|")
-		self.__window.addstr(y + 5, x, "|                              |##############################|")
-		self.__window.addstr(y + 6, x, "|                              |##############################|")
-		self.__window.addstr(y + 7, x, "|                              |##############################|")
-		self.__window.addstr(y + 8, x, "|------------------------------|------------------------------|")
-		self.__window.addstr(y + 9, x, "|                              |                              |")
-		self.__window.addstr(y +10, x, "|                              |                              |")
-		self.__window.addstr(y +11, x, "|------------------------------|------------------------------|")
+		cpu_title = cpu_title[:self.__chart_w]
+		mem_title = mem_title[:self.__chart_w]
+		self.__window.addstr(y + 1, x, "".join([" "] * (self.__chart_w * 2 + 1)))
+		self.__window.addstr(y + 1, x + int((self.__chart_w + 2 - len(cpu_title)) / 2), cpu_title)
+		self.__window.addstr(y + 1, x + self.__chart_w + 1 + int((self.__chart_w + 2 - len(mem_title)) / 2), mem_title)
+		self.__window.addstr(y + 2, x, "|" + "".join(["-"] * self.__chart_w) + "|" + "".join(["-"] * self.__chart_w) + "|")
+		
+		for i in range(self.__chart_h):
+			self.__window.addstr(y + 3 + i, x, "|" + "".join([" "] * self.__chart_w) + "|" + "".join(["#"] * self.__chart_w) + "|")
+			
+		self.__window.addstr(y + 3 + self.__chart_h, x, "|" + "".join(["-"] * self.__chart_w) + "|" + "".join(["-"] * self.__chart_w) + "|")
+		
+		if self.__showusers:
+			self.__window.addstr(y + 4 + self.__chart_h, x, "|" + "".join([" "] * self.__chart_w) + "|" + "".join([" "] * self.__chart_w) + "|")
+			self.__window.addstr(y + 5 + self.__chart_h, x, "|" + "".join([" "] * self.__chart_w) + "|" + "".join([" "] * self.__chart_w) + "|")
+			self.__window.addstr(y + 6 + self.__chart_h, x, "|" + "".join(["-"] * self.__chart_w) + "|" + "".join(["-"] * self.__chart_w) + "|")
 	
-		for j in range(30):
-			val1 = System.__getRRDValue(cpu_system, current + (j - 29) * step, step)
-			val2 = System.__getRRDValue(cpu_user, current + (j - 29) * step, step)
+		for j in range(self.__chart_w):
+			val1 = System.__getRRDValue(cpu_system, current + (j - self.__chart_w + 1) * step, step)
+			val2 = System.__getRRDValue(cpu_user, current + (j - self.__chart_w + 1) * step, step)
 			if val1 < 0 or val2 < 0:
-				self.__window.addstr(y + 3, x + 1 + j, "?")
-				self.__window.addstr(y + 4, x + 1 + j, "?")
-				self.__window.addstr(y + 5, x + 1 + j, "?")
-				self.__window.addstr(y + 6, x + 1 + j, "?")
-				self.__window.addstr(y + 7, x + 1 + j, "?")
+				for i in range(self.__chart_h):
+					self.__window.addstr(y + 3 + i, x + 1 + j, "?")
 				continue
 			val2 += val1
-			if val2 > 0:  self.__window.addstr(y + 7, x + 1 + j, "#")
-			if val2 > 20: self.__window.addstr(y + 6, x + 1 + j, "#")
-			if val2 > 40: self.__window.addstr(y + 5, x + 1 + j, "#")
-			if val2 > 60: self.__window.addstr(y + 4, x + 1 + j, "#")
-			if val2 > 80: self.__window.addstr(y + 3, x + 1 + j, "#")
-			if val1 > 0:  self.__window.addstr(y + 7, x + 1 + j, "@")
-			if val1 > 20: self.__window.addstr(y + 6, x + 1 + j, "@")
-			if val1 > 40: self.__window.addstr(y + 5, x + 1 + j, "@")
-			if val1 > 60: self.__window.addstr(y + 4, x + 1 + j, "@")
-			if val1 > 80: self.__window.addstr(y + 3, x + 1 + j, "@")
+			
+			for i in range(self.__chart_h):
+				if val2 > i / self.__chart_h * 100:  self.__window.addstr(y + self.__chart_h + 2 - i, x + 1 + j, "#")
+			for i in range(self.__chart_h):
+				if val1 > i / self.__chart_h * 100:  self.__window.addstr(y + self.__chart_h + 2 - i, x + 1 + j, "@")
 
 		i = 0
-		for u in cpu_topuser:
-			mu = u[:]
-			mu[1] += "%"
-			mu[2] = mu[2].split("/")[-1]
-			s = " ".join(mu)
-			self.__window.addstr(y + 9 + i, x + 2, s[:28])
-			i += 1
+		
+		if self.__showusers:
+			for u in cpu_topuser:
+				mu = u[:]
+				mu[1] += "%"
+				mu[2] = mu[2].split("/")[-1]
+				s = " ".join(mu)
+				self.__window.addstr(y + self.__chart_h + 4 + i, x + 2, s[:self.__chart_w - 2])
+				i += 1
 	
-		for j in range(30):
-			total = System.__getRRDValue(mem_total, current + (j - 29) * step, step)
-			val1 = System.__getRRDValue(mem_free, current + (j - 29) * step, step)
-			val2 = System.__getRRDValue(mem_cached, current + (j - 29) * step, step)
-			val3 = System.__getRRDValue(mem_buffers, current + (j - 29) * step, step)
+		for j in range(self.__chart_w):
+			total = System.__getRRDValue(mem_total, current + (j - self.__chart_w + 1) * step, step)
+			val1 = System.__getRRDValue(mem_free, current + (j - self.__chart_w + 1) * step, step)
+			val2 = System.__getRRDValue(mem_cached, current + (j - self.__chart_w + 1) * step, step)
+			val3 = System.__getRRDValue(mem_buffers, current + (j - self.__chart_w + 1) * step, step)
 			if total < 0 or val1 < 0 or val2 < 0 or val3 < 0:
-				self.__window.addstr(y + 3, x + 32 + j, "?")
-				self.__window.addstr(y + 4, x + 32 + j, "?")
-				self.__window.addstr(y + 5, x + 32 + j, "?")
-				self.__window.addstr(y + 6, x + 32 + j, "?")
-				self.__window.addstr(y + 7, x + 32 + j, "?")
+				for i in range(self.__chart_h):
+					self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, "?")
 				continue
 			val1 /= total
 			val2 = val1 + (val2 + val3) / total
-			if val2 >= 0.2: self.__window.addstr(y + 3, x + 32 + j, ".")
-			if val2 >= 0.4: self.__window.addstr(y + 4, x + 32 + j, ".")
-			if val2 >= 0.6: self.__window.addstr(y + 5, x + 32 + j, ".")
-			if val2 >= 0.8: self.__window.addstr(y + 6, x + 32 + j, ".")
-			if val2 == 1.0: self.__window.addstr(y + 7, x + 32 + j, ".")
-			if val1 >= 0.2: self.__window.addstr(y + 3, x + 32 + j, " ")
-			if val1 >= 0.4: self.__window.addstr(y + 4, x + 32 + j, " ")
-			if val1 >= 0.6: self.__window.addstr(y + 5, x + 32 + j, " ")
-			if val1 >= 0.8: self.__window.addstr(y + 6, x + 32 + j, " ")
-			if val1 == 1.0: self.__window.addstr(y + 7, x + 32 + j, " ")
+			
+			for i in range(self.__chart_h):
+				if val2 >= i / self.__chart_h:  self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, ".")
+			for i in range(self.__chart_h):
+				if val1 >= i / self.__chart_h:  self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, " ")
 	
 		i = 0
-		for u in mem_topuser:
-			mu = u[:]
-			mu[1] += "%"
-			mu[2] = mu[2].split("/")[-1]
-			s = " ".join(mu)
-			self.__window.addstr(y + 9 + i, x + 33, s[:28])
-			i += 1
+		
+		if self.__showusers:
+			for u in mem_topuser:
+				mu = u[:]
+				mu[1] += "%"
+				mu[2] = mu[2].split("/")[-1]
+				s = " ".join(mu)
+				self.__window.addstr(y + self.__chart_h + 4 + i, x + self.__chart_w + 3, s[:self.__chart_w - 2])
+				i += 1
 	
 		return current - j * step, current
 
@@ -292,12 +290,16 @@ class System:
 		endtime = 0
 		now = int(time.mktime(datetime.now().timetuple()))
 		now -= now % 60
-		for starty in range(0, self.__h - 14, 13):
-			for startx in range(0, self.__w - 62, 65):
+		
+		needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
+		needed_w = self.__chart_w * 2 + 3
+		
+		for starty in range(0, self.__h - needed_h - 1, needed_h):
+			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
 				hostname = Env.HOSTS[i]
 
-				self.__window.addstr(starty + 0, startx, "                                                               ")
-				self.__window.addstr(starty + 0, startx + int((63 - len(hostname)) / 2), hostname)
+				self.__window.addstr(starty + 0, startx, "".join([" "] * needed_w))
+				self.__window.addstr(starty + 0, startx + int((needed_w - len(hostname)) / 2), hostname)
 
 				if self.__timescale == 0:
 					step = 60 # 30 mins
@@ -322,10 +324,12 @@ class System:
 
 		starttimestr = datetime.fromtimestamp(starttime).strftime('%Y-%m-%d %H:%M:%S')
 		endtimestr = datetime.fromtimestamp(endtime).strftime('%Y-%m-%d %H:%M:%S')
-		self.__window.addstr(starty + 13, 1, "[ # ] user   [ @ ] sys         [ # ] user   [ . ] cache/buff")
+		self.__window.addstr(starty + self.__chart_h + (3 if self.__showusers else 0) + 5, 1, "[ # ] user  [ @ ] sys")
+		self.__window.addstr(starty + self.__chart_h + (3 if self.__showusers else 0) + 5, self.__chart_w + 2, "[ # ] user  [ . ] cache/buff")
 		self.__window.addstr(self.__h - 1, 1, "%s - %s" % (starttimestr, endtimestr))
 
 		self.__window.refresh()
+		self.__window.move(self.__h - 1, 0)
 
 
 	def __mainloop(self):
