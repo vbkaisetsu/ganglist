@@ -248,7 +248,6 @@ class System:
 		hline = '-' * self.__chart_w
 		hsharp = '#' * self.__chart_w
 		rowText = lambda l, r, sep: sep + l + sep + r + sep # ex. '|@@@@|####|'
-		padding = lambda w, text: (w - len(text)) // 2 # left padding length for centering
 
 		cpu_title = "cpu (%d * %sHz)" % (cpu_num, (("%.1fG" % (cpu_speed / 1000)) if cpu_speed >= 1000 else ("%.1fM" % cpu_speed)))
 		mem_title = "mem (%siB)" % (("%.1fG" % (mem_total[-1][1] / 1024 / 1024)) if mem_total[-1][1] >= 1024 else ("%.1fM" % (mem_total[-1][1] / 1024)))
@@ -256,8 +255,8 @@ class System:
 		mem_title = mem_title[:self.__chart_w]
 
 		self.__window.addstr(y + 1, x, rowText(hspace, hspace, ' '))
-		self.__window.addstr(y + 1, x + 1 + padding(self.__chart_w, cpu_title), cpu_title)
-		self.__window.addstr(y + 1, x + self.__chart_w + 2 + padding(self.__chart_w, mem_title), mem_title)
+		self.__window.addstr(y + 1, x + 1, cpu_title.center(self.__chart_w))
+		self.__window.addstr(y + 1, x + self.__chart_w + 2, mem_title.center(self.__chart_w))
 		self.__window.addstr(y + 2, x, rowText(hline, hline, '|'))
 		
 		for i in range(self.__chart_h):
@@ -338,8 +337,8 @@ class System:
 			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
 				hostname = Env.HOSTS[hn]
 
-				self.__window.addstr(starty + 0, startx, " " * needed_w)
-				self.__window.addstr(starty + 0, startx + int((needed_w - len(hostname)) / 2), hostname)
+				#self.__window.addstr(starty + 0, startx, " " * needed_w)
+				self.__window.addstr(starty + 0, startx, hostname.center(needed_w))
 
 				step = System.__timeScaleToStep(self.__timescale)
 
