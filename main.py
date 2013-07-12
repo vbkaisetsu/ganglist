@@ -13,7 +13,9 @@ from system import System
 def parseOptions():
 	from optparse import OptionParser, SUPPRESS_HELP
 
-	q = OptionParser()
+	q = OptionParser(epilog="""
+This GangList has my master's powers.
+""")
 
 	# add options into parser
 	q.add_option('-W', '--width', dest='width',
