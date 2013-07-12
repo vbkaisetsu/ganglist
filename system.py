@@ -32,6 +32,28 @@ class System:
 			return 86400 # 30 days
 		else:
 			raise ValueError
+	
+
+	@staticmethod
+	def __stepToStr(step):
+		if step < 1:
+			raise ValueError
+		elif step == 1:
+			return '%d second' % (step * 30)
+		step //= 2
+		if step == 1:
+			return '1 minute'
+		elif step < 60:
+			return '%d minutes' % step
+		step //= 60
+		if step == 1:
+			return '1 hour'
+		elif step < 24:
+			return '%d hours' % step
+		step //= 24
+		if step == 1:
+			return '1 day'
+		return '%d days' % step
 			
 
 	@staticmethod
@@ -380,8 +402,9 @@ class System:
 		
 		starttimestr = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
 		endtimestr = datetime.fromtimestamp(endtime).strftime('%Y-%m-%d %H:%M:%S')
+		stepstr = System.__stepToStr(step)
 
-		self.__printFooter("%s - %s" % (starttimestr, endtimestr))
+		self.__printFooter("%s - %s (%s)" % (starttimestr, endtimestr, stepstr))
 		self.__refresh()
 
 
