@@ -55,6 +55,10 @@ class System:
 
 	def __init__(self, options):
 		self.__options = options
+		
+		self.__chart_h = self.__options.height
+		self.__chart_w = self.__options.width
+		self.__showusers = self.__options.showusers
 	
 
 	def __initial(self):
@@ -69,7 +73,6 @@ class System:
 		self.__timer = 0
 		self.__mpp = 0
 		self.__page = 0
-		self.__firstloop = True
 		self.__redraw = False
 
 		self.__cpu_num = {}
@@ -88,10 +91,6 @@ class System:
 		self.__h = 0
 		self.__w = 0
 
-		self.__chart_h = self.__options.height
-		self.__chart_w = self.__options.width
-		self.__showusers = self.__options.showusers
-
 
 	def __final(self):
 		self.__window.keypad(0)
@@ -99,6 +98,33 @@ class System:
 		curses.nocbreak()
 		curses.echo()
 		curses.endwin()
+
+
+	# get machines per page
+	def __initPage(self):
+		i = 0
+		self.__h, self.__w = self.__window.getmaxyx()
+		
+		needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
+		needed_w = self.__chart_w * 2 + 3
+		
+		if self.__h < needed_h + 2 or self.__w < needed_w:
+			return False
+
+		for starty in range(0, self.__h - needed_h + 1, needed_h):
+			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
+				i += 1
+				if i == len(Env.HOSTS):
+					break
+			if i == len(Env.HOSTS):
+				break
+
+		if self.__mpp != i:
+			self.__mpp = i
+			self.__page = 0
+		self.__redraw = True
+
+		return True
 	
 
 	def __keystroke(self):
@@ -109,53 +135,31 @@ class System:
 			return False
 		
 		# Resize
-		elif key == curses.KEY_RESIZE or self.__firstloop:
-			# get machines per page
-			i = 0
-			self.__h, self.__w = self.__window.getmaxyx()
-			
-			needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
-			needed_w = self.__chart_w * 2 + 3
-			
-			if self.__h < needed_h + 2 or self.__w < needed_w:
+		elif key == curses.KEY_RESIZE:
+			if not self.__initPage():
 				return False
-			for starty in range(0, self.__h - needed_h + 1, needed_h):
-				for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
-					i += 1
-					if i == len(Env.HOSTS):
-						break
-				if i == len(Env.HOSTS):
-					break
-			if self.__mpp != i:
-				self.__mpp = i
-				self.__page = 0
-			self.__redraw = True
-
+			
 		# Down: next page
 		elif key == curses.KEY_DOWN:
-			self.__page += 1
-			if len(Env.HOSTS) <= self.__mpp * self.__page:
-				self.__page -= 1
-			else:
+			if self.__mpp * (self.__page + 1) < len(Env.HOSTS):
+				self.__page += 1
 				self.__redraw = True
 
 		# Up: previous page
 		elif key == curses.KEY_UP:
-			if self.__page != 0:
+			if self.__page > 0:
 				self.__page -= 1
 				self.__redraw = True
 
 		# Left: zoom-out
 		elif key == curses.KEY_LEFT:
-			self.__timescale += 1
-			if self.__timescale > 4:
-				self.__timescale -= 1
-			else:
+			if self.__timescale < 4:
+				self.__timescale += 1
 				self.__redraw = True
 
 		# Right: zoom-in
 		elif key == curses.KEY_RIGHT:
-			if self.__timescale != 0:
+			if self.__timescale > 0:
 				self.__timescale -= 1
 				self.__redraw = True
 
@@ -197,6 +201,7 @@ class System:
 
 	def __drawStatus(self, x, y, current, step, hostname):
 		
+		# variables
 		cpu_user    = self.__cpu_user[hostname]
 		cpu_system  = self.__cpu_system[hostname]
 		cpu_num     = self.__cpu_num[hostname]
@@ -208,25 +213,28 @@ class System:
 		mem_total   = self.__mem_total[hostname]
 		mem_topuser = self.__mem_topuser[hostname]
 
+		# utilities
+		hspace = ' ' * self.__chart_w
+		hline = '-' * self.__chart_w
+		hsharp = '#' * self.__chart_w
+		rowText = lambda l, r, sep: sep + l + sep + r + sep # ex. '|@@@@|####|'
+		padding = lambda w, text: (w - len(text)) // 2 # left padding length for centering
+
 		cpu_title = "cpu (%d * %sHz)" % (cpu_num, (("%.1fG" % (cpu_speed / 1000)) if cpu_speed >= 1000 else ("%.1fM" % cpu_speed)))
 		mem_title = "mem (%siB)" % (("%.1fG" % (mem_total[-1][1] / 1024 / 1024)) if mem_total[-1][1] >= 1024 else ("%.1fM" % (mem_total[-1][1] / 1024)))
 		cpu_title = cpu_title[:self.__chart_w]
 		mem_title = mem_title[:self.__chart_w]
-		self.__window.addstr(y + 1, x, "".join([" "] * (self.__chart_w * 2 + 1)))
-		self.__window.addstr(y + 1, x + int((self.__chart_w + 2 - len(cpu_title)) / 2), cpu_title)
-		self.__window.addstr(y + 1, x + self.__chart_w + 1 + int((self.__chart_w + 2 - len(mem_title)) / 2), mem_title)
-		self.__window.addstr(y + 2, x, "|" + "".join(["-"] * self.__chart_w) + "|" + "".join(["-"] * self.__chart_w) + "|")
+
+		self.__window.addstr(y + 1, x, rowText(hspace, hspace, ' '))
+		self.__window.addstr(y + 1, x + 1 + padding(self.__chart_w, cpu_title), cpu_title)
+		self.__window.addstr(y + 1, x + self.__chart_w + 2 + padding(self.__chart_w, mem_title), mem_title)
+		self.__window.addstr(y + 2, x, rowText(hline, hline, '|'))
 		
 		for i in range(self.__chart_h):
-			self.__window.addstr(y + 3 + i, x, "|" + "".join([" "] * self.__chart_w) + "|" + "".join(["#"] * self.__chart_w) + "|")
+			self.__window.addstr(y + 3 + i, x, rowText(hspace, hsharp, '|'))
 			
-		self.__window.addstr(y + 3 + self.__chart_h, x, "|" + "".join(["-"] * self.__chart_w) + "|" + "".join(["-"] * self.__chart_w) + "|")
+		self.__window.addstr(y + 3 + self.__chart_h, x, rowText(hline, hline, '|'))
 		
-		if self.__showusers:
-			self.__window.addstr(y + 4 + self.__chart_h, x, "|" + "".join([" "] * self.__chart_w) + "|" + "".join([" "] * self.__chart_w) + "|")
-			self.__window.addstr(y + 5 + self.__chart_h, x, "|" + "".join([" "] * self.__chart_w) + "|" + "".join([" "] * self.__chart_w) + "|")
-			self.__window.addstr(y + 6 + self.__chart_h, x, "|" + "".join(["-"] * self.__chart_w) + "|" + "".join(["-"] * self.__chart_w) + "|")
-	
 		for j in range(self.__chart_w):
 			val1 = System.__getRRDValue(cpu_system, current + (j - self.__chart_w + 1) * step, step)
 			val2 = System.__getRRDValue(cpu_user, current + (j - self.__chart_w + 1) * step, step)
@@ -237,13 +245,19 @@ class System:
 			val2 += val1
 			
 			for i in range(self.__chart_h):
-				if val2 > i / self.__chart_h * 100:  self.__window.addstr(y + self.__chart_h + 2 - i, x + 1 + j, "#")
+				if val2 > i / self.__chart_h * 100:
+					self.__window.addstr(y + self.__chart_h + 2 - i, x + 1 + j, "#")
 			for i in range(self.__chart_h):
-				if val1 > i / self.__chart_h * 100:  self.__window.addstr(y + self.__chart_h + 2 - i, x + 1 + j, "@")
+				if val1 > i / self.__chart_h * 100:
+					self.__window.addstr(y + self.__chart_h + 2 - i, x + 1 + j, "@")
 
 		i = 0
 		
 		if self.__showusers:
+			self.__window.addstr(y + 4 + self.__chart_h, x, rowText(hspace, hspace, '|'))
+			self.__window.addstr(y + 5 + self.__chart_h, x, rowText(hspace, hspace, '|'))
+			self.__window.addstr(y + 6 + self.__chart_h, x, rowText(hline, hline, '|'))
+
 			for u in cpu_topuser:
 				mu = u[:]
 				mu[1] += "%"
@@ -333,8 +347,17 @@ class System:
 
 
 	def __mainloop(self):
+		
+		firstloop = True
+
 		while True:
 			self.__redraw = False
+
+			# initial update
+			if firstloop:
+				firstloop = False
+				if not self.__initPage():
+					return
 
 			# process key stroke
 			if not self.__keystroke():
@@ -354,8 +377,6 @@ class System:
 				# since the screen will be refreshed when receiving next KEY_RESIZE message,
 				# this error may be ignored.
 				pass
-			
-			self.__firstloop = False
 
 
 	def run(self):

@@ -8,6 +8,7 @@ class Utils:
 
 
 	# print error message.
+	@staticmethod
 	def perror(text):
 		import sys
 		sys.stderr.write('ERROR: '+text+'\n')
@@ -15,6 +16,7 @@ class Utils:
 
 	# convert some data into corresponding integer value
 	# or -1 if cannot.
+	@staticmethod
 	def safeInt(data):
 		try:
 			return int(data)
@@ -23,6 +25,7 @@ class Utils:
 
 	# convert some data into corresponding float value
 	# or -1.0 if cannot.
+	@staticmethod
 	def safeFloat(data):
 		try:
 			return float(data)
@@ -34,7 +37,7 @@ class Utils:
 # Please read the following code as a document.
 class Neubig:
 
-	logo_right = [
+	__logo_right = [
 		'               .i   l,                          ',
 		'  ;G,:@Cf     iG    .:LG;, lC;.          f;     ',
 		'   tl@,;@@G,L                     ,ft           ',
@@ -69,7 +72,7 @@ class Neubig:
 		'                                ,.              ',
 	]
 
-	logo_left = [
+	__logo_left = [
 		'                          ,l   i.               ',
 		'     ;f          .;Cl ,;GL:.    Ci     fC@:,G;  ',
 		'           tf,                     L,G@@;,@lt   ',
@@ -105,7 +108,8 @@ class Neubig:
 	]
 
 
-	def suffle(data):
+	@staticmethod
+	def __shuffle(data):
 		array = [0] * 32
 		for i in range(32):
 			t = i
@@ -115,15 +119,28 @@ class Neubig:
 				t >>= 1
 			array[k] = data[i]
 		return array
+	
+
+	@staticmethod
+	def stand():
+		for l in Neubig.__shuffle(Neubig.__logo_left):
+			print(l)
+	
+
+	@staticmethod
+	def rstand():
+		for l in Neubig.__shuffle(Neubig.__logo_right):
+			print(l)
 
 
-	def main():
+	@staticmethod
+	def walk():
 		import curses, random, math
 		
 		tau = 0.003
 		
-		logo_left = Neubig.suffle(Neubig.logo_left)
-		logo_right = Neubig.suffle(Neubig.logo_right)
+		logo_left = Neubig.__shuffle(Neubig.__logo_left)
+		logo_right = Neubig.__shuffle(Neubig.__logo_right)
 		
 		window = curses.initscr() 
 		curses.noecho()

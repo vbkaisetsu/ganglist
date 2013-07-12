@@ -5,7 +5,7 @@
 
 from settings import Options
 import utils
-from utils import Utils
+from utils import *
 from system import System
 
 
@@ -26,15 +26,22 @@ This GangList has my master's powers.
 		default=str(Options.DEFAULT_HEIGHT),
 		help='graph height (default: %d)' % Options.DEFAULT_HEIGHT,
 		metavar='<INT>')
-	q.add_option('-U', '--withusers', action="store_true", dest='showusers',
+	q.add_option('-u', '--withusers', action="store_true", dest='showusers',
 		default=bool(Options.DEFAULT_SHOWUSERS),
-		help='enable user list (default: %s)' % str(Options.DEFAULT_SHOWUSERS))
-	q.add_option('-N', '--nouser', action="store_false", dest='showusers',
+		help='enable user list explicitly')
+	q.add_option('-n', '--nouser', action="store_false", dest='showusers',
 		default=bool(Options.DEFAULT_SHOWUSERS),
-		help='disable user list (default: %s)' % str(not Options.DEFAULT_SHOWUSERS))
-	
+		help='disable user list explicitly')
+	q.add_option('-l', '--inline', action='store_true', dest='inline',
+		default=bool(Options.DEFAULT_INLINE),
+		help='inline view')
+
 	# eggs
 	q.add_option('--neubig', dest='neubig',
+		action='store_true', default=False, help=SUPPRESS_HELP)
+	q.add_option('--right', dest='right',
+		action='store_true', default=False, help=SUPPRESS_HELP)
+	q.add_option('--walk', dest='walk',
 		action='store_true', default=False, help=SUPPRESS_HELP)
 	
 	# analyze
@@ -50,11 +57,14 @@ This GangList has my master's powers.
 # assert options and convert data type if necessary
 def checkOptions(options):
 
-	def forceInteger(options, name):
+	def forceInt(options, name):
 		val = getattr(options, name)
 		if not val.isdigit():
 			raise ValueError('Option "%s" must be integer.' % name)
 		setattr(options, name, int(val))
+	
+	def forceBool(options, name):
+		setattr(options, name, bool(getattr(options, name)))
 
 	def assertRange(options, name, minval, maxval):
 		val = getattr(options, name)
@@ -62,8 +72,12 @@ def checkOptions(options):
 			raise ValueError('Option "%s" must be: %d <= %s <= %d.' % (name, minval, name, maxval))
 	
 	try:
-		forceInteger(options, 'width')
-		forceInteger(options, 'height')
+		forceInt(options, 'width')
+		forceInt(options, 'height')
+		forceBool(options, 'showusers')
+		forceBool(options, 'neubig')
+		forceBool(options, 'right')
+		forceBool(options, 'walk')
 		assertRange(options, 'width', Options.MIN_WIDTH, Options.MAX_WIDTH)
 		assertRange(options, 'height', Options.MIN_HEIGHT, Options.MAX_HEIGHT)
 	except ValueError as e:
@@ -80,7 +94,12 @@ def run():
 		return
 
 	if options.neubig:
-		utils.Neubig.main()
+		if options.walk:
+			Neubig.walk()
+		elif options.right:
+			Neubig.rstand()
+		else:
+			Neubig.stand()
 	else:
 		sys = System(options)
 		sys.run()
