@@ -5,7 +5,7 @@
 
 from settings import Options
 import utils
-from utils import Utils
+from utils import *
 from system import System
 
 
@@ -35,6 +35,10 @@ This GangList has my master's powers.
 	
 	# eggs
 	q.add_option('--neubig', dest='neubig',
+		action='store_true', default=False, help=SUPPRESS_HELP)
+	q.add_option('--right', dest='right',
+		action='store_true', default=False, help=SUPPRESS_HELP)
+	q.add_option('--walk', dest='walk',
 		action='store_true', default=False, help=SUPPRESS_HELP)
 	
 	# analyze
@@ -80,7 +84,12 @@ def run():
 		return
 
 	if options.neubig:
-		utils.Neubig.main()
+		if options.walk:
+			Neubig.walk()
+		elif options.right:
+			Neubig.rstand()
+		else:
+			Neubig.stand()
 	else:
 		sys = System(options)
 		sys.run()
