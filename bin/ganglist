@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8; indent-tabs-mode: t; tab-width: 4 -*-
 
-import main
+from ganglist import main
 
-main.run()
+if __name__ == "__main__":
+	main.run()
