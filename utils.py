@@ -154,7 +154,9 @@ class Neubig:
 				window.clear()
 
 			for i, line in enumerate(logo):
-				if h <= y + i:
+				if y + i < 0:
+					continue
+				if h <= y + i + 1:
 					break
 				if x < 0:
 					window.addstr(y + i, 0, line[-x:w-x])
