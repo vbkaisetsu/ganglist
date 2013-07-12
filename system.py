@@ -235,11 +235,6 @@ class System:
 			
 		self.__window.addstr(y + 3 + self.__chart_h, x, rowText(hline, hline, '|'))
 		
-		if self.__showusers:
-			self.__window.addstr(y + 4 + self.__chart_h, x, rowText(hspace, hspace, '|'))
-			self.__window.addstr(y + 5 + self.__chart_h, x, rowText(hspace, hspace, '|'))
-			self.__window.addstr(y + 6 + self.__chart_h, x, rowText(hline, hline, '|'))
-	
 		for j in range(self.__chart_w):
 			val1 = System.__getRRDValue(cpu_system, current + (j - self.__chart_w + 1) * step, step)
 			val2 = System.__getRRDValue(cpu_user, current + (j - self.__chart_w + 1) * step, step)
@@ -259,6 +254,10 @@ class System:
 		i = 0
 		
 		if self.__showusers:
+			self.__window.addstr(y + 4 + self.__chart_h, x, rowText(hspace, hspace, '|'))
+			self.__window.addstr(y + 5 + self.__chart_h, x, rowText(hspace, hspace, '|'))
+			self.__window.addstr(y + 6 + self.__chart_h, x, rowText(hline, hline, '|'))
+
 			for u in cpu_topuser:
 				mu = u[:]
 				mu[1] += "%"
