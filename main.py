@@ -36,6 +36,9 @@ This GangList has my master's powers.
 	q.add_option('-n', '--nouser', action="store_false", dest='showusers',
 		default=bool(Options.DEFAULT_SHOWUSERS),
 		help='disable user list explicitly')
+	q.add_option('-l', '--inline', action='store_true', dest='inline',
+		default=bool(Options.DEFAULT_INLINE),
+		help='inline view')
 
 	# eggs
 	q.add_option('--neubig', dest='neubig',
