@@ -35,6 +35,10 @@ This GangList has my master's powers.
 	q.add_option('-l', '--inline', action='store_true', dest='inline',
 		default=bool(Options.DEFAULT_INLINE),
 		help='inline view')
+	q.add_option('-t', '--interval', dest='interval',
+		default=str(Options.DEFAULT_INTERVAL),
+		help='update interval [seconds] (default: %d)' % Options.DEFAULT_INTERVAL,
+		metavar='<INT>')
 
 	# eggs
 	q.add_option('--neubig', dest='neubig',
@@ -74,12 +78,14 @@ def checkOptions(options):
 	try:
 		forceInt(options, 'width')
 		forceInt(options, 'height')
+		forceInt(options, 'interval')
 		forceBool(options, 'showusers')
 		forceBool(options, 'neubig')
 		forceBool(options, 'right')
 		forceBool(options, 'walk')
 		assertRange(options, 'width', Options.MIN_WIDTH, Options.MAX_WIDTH)
 		assertRange(options, 'height', Options.MIN_HEIGHT, Options.MAX_HEIGHT)
+		assertRange(options, 'interval', Options.MIN_INTERVAL, Options.MAX_INTERVAL)
 	except ValueError as e:
 		Utils.perror(str(e))
 		return False

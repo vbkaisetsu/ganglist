@@ -7,16 +7,19 @@ class Options:
 	# default values for command-line options
 	DEFAULT_WIDTH = 30
 	DEFAULT_HEIGHT = 5
+	DEFAULT_INTERVAL = 60
 	DEFAULT_SHOWUSERS = True
 	DEFAULT_INLINE = False
 
 	# minimum values for command-line options
 	MIN_WIDTH = 1
 	MIN_HEIGHT = 1
+	MIN_INTERVAL = 10
 
 	# maximum values for command-line options
 	MAX_WIDTH = 100
 	MAX_HEIGHT = 100
+	MAX_INTERVAL = 600
 
 
 class Environment:

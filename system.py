@@ -13,6 +13,9 @@ from utils import Utils
 
 
 class System:
+
+
+	__TIMEOUT = 10
 	
 
 	@staticmethod
@@ -83,7 +86,7 @@ class System:
 		curses.cbreak()
 		curses.raw()
 		self.__window.keypad(1)
-		self.__window.timeout(10)
+		self.__window.timeout(System.__TIMEOUT)
 
 		self.__timescale = 0
 		self.__timer = 0
@@ -192,6 +195,7 @@ class System:
 		return True
 	
 
+
 	def __elapse(self):
 		if self.__timer == 0:
 			for m in Env.HOSTS:
@@ -219,8 +223,8 @@ class System:
 
 		# go ahead
 		self.__timer += 1
-		if self.__timer >= 6000:
-			self.__timer -= 6000
+		if self.__timer >= self.__options.interval * 1000 // System.__TIMEOUT:
+			self.__timer = 0
 
 		return True
 	
