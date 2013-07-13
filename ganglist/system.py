@@ -96,11 +96,11 @@ class System:
 	def __init__(self, options, env):
 		self.__options = options
 		self.__env = env
-		
+
 		self.__chart_h = self.__options.height
 		self.__chart_w = self.__options.width
 		self.__showusers = self.__options.showusers
-	
+
 
 	def __initial(self):
 		self.__window = curses.initscr()
@@ -144,7 +144,7 @@ class System:
 	def __printFooter(self, text):
 		self.__window.addstr(self.__h - 1, 0, ' ' * (self.__w - 1))
 		self.__window.addstr(self.__h - 1, 1, text)
-	
+
 
 	def __refresh(self):
 		self.__window.move(self.__h - 1, 0)
@@ -155,10 +155,10 @@ class System:
 	def __initPage(self):
 		i = 0
 		self.__h, self.__w = self.__window.getmaxyx()
-		
+
 		needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
 		needed_w = self.__chart_w * 2 + 3
-		
+
 		if self.__h < needed_h + 2 or self.__w < needed_w:
 			return False
 
@@ -176,7 +176,7 @@ class System:
 		self.__redraw = True
 
 		return True
-	
+
 
 	def __keystroke(self):
 		key = self.__window.getch();
@@ -193,7 +193,7 @@ class System:
 		elif key == curses.KEY_RESIZE:
 			if not self.__initPage():
 				return False
-			
+
 		# Down: next page
 		elif key == curses.KEY_DOWN:
 			if self.__mpp * (self.__page + 1) < len(self.__env.HOSTS):
@@ -219,7 +219,7 @@ class System:
 				self.__redraw = True
 
 		return True
-	
+
 
 	def __elapse(self):
 		if self.__timer == 0:
@@ -252,10 +252,10 @@ class System:
 			self.__timer = 0
 
 		return True
-	
+
 
 	def __drawStatus(self, x, y, current, step, hostname):
-		
+
 		# variables
 		cpu_user    = self.__cpu_user[hostname]
 		cpu_system  = self.__cpu_system[hostname]
@@ -273,7 +273,7 @@ class System:
 		hline = '-' * self.__chart_w
 		hsharp = '#' * self.__chart_w
 		rowText = lambda l, r, sep: sep + l + sep + r + sep # ex. '|@@@@|####|'
-		
+
 		cpu_title = "cpu (%d * %sHz)" % (cpu_num, (("%.1fG" % (cpu_speed / 1000)) if cpu_speed >= 1000 else ("%.1fM" % cpu_speed)))
 		mem_title = "mem (%siB)" % (("%.1fG" % (mem_total[-1][1] / 1024 / 1024)) if mem_total[-1][1] >= 1024 else ("%.1fM" % (mem_total[-1][1] / 1024)))
 		cpu_title = cpu_title[:self.__chart_w]
@@ -283,12 +283,12 @@ class System:
 		self.__window.addstr(y + 1, x + 1, cpu_title.center(self.__chart_w))
 		self.__window.addstr(y + 1, x + self.__chart_w + 2, mem_title.center(self.__chart_w))
 		self.__window.addstr(y + 2, x, rowText(hline, hline, '|'))
-		
+
 		for i in range(self.__chart_h):
 			self.__window.addstr(y + 3 + i, x, rowText(hspace, hsharp, '|'))
-			
+
 		self.__window.addstr(y + 3 + self.__chart_h, x, rowText(hline, hline, '|'))
-		
+
 		for j in range(self.__chart_w):
 			val1 = System.__getRRDValue(cpu_system, current + (j - self.__chart_w + 1) * step, step)
 			val2 = System.__getRRDValue(cpu_user, current + (j - self.__chart_w + 1) * step, step)
@@ -297,7 +297,7 @@ class System:
 					self.__window.addstr(y + 3 + i, x + 1 + j, "?")
 				continue
 			val2 += val1
-			
+
 			for i in range(self.__chart_h):
 				if val2 > i / self.__chart_h * 100:
 					self.__window.addstr(y + self.__chart_h + 2 - i, x + 1 + j, "#")
@@ -306,7 +306,7 @@ class System:
 					self.__window.addstr(y + self.__chart_h + 2 - i, x + 1 + j, "@")
 
 		i = 0
-		
+
 		if self.__showusers:
 			self.__window.addstr(y + 4 + self.__chart_h, x, rowText(hspace, hspace, '|'))
 			self.__window.addstr(y + 5 + self.__chart_h, x, rowText(hspace, hspace, '|'))
@@ -319,7 +319,7 @@ class System:
 				s = " ".join(mu)
 				self.__window.addstr(y + self.__chart_h + 4 + i, x + 2, s[:self.__chart_w - 2])
 				i += 1
-	
+
 		for j in range(self.__chart_w):
 			total = System.__getRRDValue(mem_total, current + (j - self.__chart_w + 1) * step, step)
 			val1 = System.__getRRDValue(mem_free, current + (j - self.__chart_w + 1) * step, step)
@@ -332,16 +332,16 @@ class System:
 
 			val1 /= total
 			val2 = val1 + (val2 + val3) / total
-			
+
 			for i in range(self.__chart_h):
 				if val2 >= i / self.__chart_h:
 					self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, ".")
 			for i in range(self.__chart_h):
 				if val1 >= i / self.__chart_h:
 					self.__window.addstr(y + 3 + i, x + self.__chart_w + 2 + j, " ")
-	
+
 		i = 0
-		
+
 		if self.__showusers:
 			for u in mem_topuser:
 				mu = u[:]
@@ -352,12 +352,12 @@ class System:
 				i += 1
 
 
-def __drawBoxes(self, now, step):
+	def __drawBoxes(self, now, step):
 		needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
 		needed_w = self.__chart_w * 2 + 3
-		
+
 		hn = self.__mpp * self.__page
-		
+
 		for starty in range(0, self.__h - needed_h - 1, needed_h):
 			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
 				hostname = self.__env.HOSTS[hn]
@@ -369,7 +369,7 @@ def __drawBoxes(self, now, step):
 
 				# each statuses
 				self.__drawStatus(startx, starty, now, step, hostname)
-				
+
 				hn += 1
 				if hn == len(self.__env.HOSTS):
 					break
@@ -380,12 +380,12 @@ def __drawBoxes(self, now, step):
 		uy = starty + self.__chart_h + (3 if self.__showusers else 0) + 5
 		self.__window.addstr(uy, 1, "[ # ] user  [ @ ] sys")
 		self.__window.addstr(uy, self.__chart_w + 2, "[ # ] user  [ . ] cache/buff")
-	
+
 
 	def __drawInlines(self, now, step):
 		self.__window.addstr(0, 0, 'Sorry, this option is not implemented yet.');
 
-	
+
 	def __draw(self):
 		self.__window.erase()
 
@@ -393,12 +393,12 @@ def __drawBoxes(self, now, step):
 		now -= now % 60
 		step = System.__timeScaleToStep(self.__timescale)
 		start = now - step * (self.__chart_w - 1)
-		
+
 		if self.__options.inline:
 			self.__drawInlines(now, step)
 		else:
 			self.__drawBoxes(now, step)
-		
+
 		startstr = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
 		nowstr = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
 		stepstr = System.__stepToStr(step)
@@ -408,7 +408,7 @@ def __drawBoxes(self, now, step):
 
 
 	def __mainloop(self):
-		
+
 		firstloop = True
 
 		while True:
@@ -428,7 +428,7 @@ def __drawBoxes(self, now, step):
 				# update
 				if not self.__elapse():
 					return
-				
+
 				# redraw
 				if self.__redraw:
 					self.__draw()
