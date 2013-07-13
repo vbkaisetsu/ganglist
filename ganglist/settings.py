@@ -13,16 +13,19 @@ class Options:
 		# default values for command-line options
 		self.DEFAULT_WIDTH = 30
 		self.DEFAULT_HEIGHT = 5
+		self.DEFAULT_INTERVAL = 60
 		self.DEFAULT_SHOWUSERS = True
 		self.DEFAULT_INLINE = False
 
 		# minimum values for command-line options
 		self.MIN_WIDTH = 1
 		self.MIN_HEIGHT = 1
+		self.MIN_INTERVAL = 10
 
 		# maximum values for command-line options
 		self.MAX_WIDTH = 100
 		self.MAX_HEIGHT = 100
+		self.MAX_INTERVAL = 600
 
 
 class Environment:
@@ -59,6 +62,8 @@ class Settings:
 				self.options.DEFAULT_WIDTH = conffile["Options"].getint("DEFAULT_WIDTH")
 			if "DEFAULT_HEIGHT" in conffile["Options"]:
 				self.options.DEFAULT_HEIGHT = conffile["Options"].getint("DEFAULT_HEIGHT")
+			if "DEFAULT_INTERVAL" in conffile["Options"]:
+				self.options.DEFAULT_INTERVAL = conffile["Options"].getint("DEFAULT_INTERVAL")
 			if "DEFAULT_SHOWUSERS" in conffile["Options"]:
 				self.options.DEFAULT_SHOWUSERS = conffile["Options"].getboolean("DEFAULT_SHOWUSERS")
 			if "DEFAULT_INLINE" in conffile["Options"]:
@@ -67,10 +72,14 @@ class Settings:
 				self.options.MIN_WIDTH = conffile["Options"].getint("MIN_WIDTH")
 			if "MIN_HEIGHT" in conffile["Options"]:
 				self.options.MIN_HEIGHT = conffile["Options"].getint("MIN_HEIGHT")
+			if "MIN_INTERVAL" in conffile["Options"]:
+				self.options.MIN_INTERVAL = conffile["Options"].getint("MIN_INTERVAL")
 			if "MAX_WIDTH" in conffile["Options"]:
 				self.options.MAX_WIDTH = conffile["Options"].getint("MAX_WIDTH")
 			if "MAX_HEIGHT" in conffile["Options"]:
 				self.options.MAX_HEIGHT = conffile["Options"].getint("MAX_HEIGHT")
+			if "MAX_INTERVAL" in conffile["Options"]:
+				self.options.MAX_INTERVAL = conffile["Options"].getint("MAX_INTERVAL")
 
 		if "Environment" in conffile:
 			if "DATADIR" in conffile["Environment"]:
