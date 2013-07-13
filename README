@@ -22,7 +22,13 @@ For Developers:
   	from ganglist import main
   	main.run()
   
-  2. To run this program, use the following command:
+  2. Copy ./ganglia/config.py.in to ./ganglia/config.py and edit it like this:
+  
+  	SYSTEM_CONFIG_DIR="/etc"
+  	LOCAL_STATE_DIR="/var"
+  	VERSION="0.1"
+  
+  3. To run this program, use the following command:
   
   	$ python3 ./run.py
 
