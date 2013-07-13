@@ -4,6 +4,38 @@ CUI frontend of Ganglia
 
 ================================================================================
 
+For Users:
+
+ To use this program, please copy ./config/ganglist.conf to /etc/ganglist.conf
+ on the system directory or ~/.ganglist.conf on your home directory as a hidden
+ file. Then, fill HOSTS to tell clasters to this program.
+
+================================================================================
+
+For Developers:
+
+ If you use Debian (or Ubuntu), you can run this program immidiately by the
+ following step:
+
+  1. Create ./run.py with the following code:
+  
+  	from ganglist import main
+  	main.run()
+  
+  2. Copy ./ganglia/config.py.in to ./ganglia/config.py and edit it like this:
+  
+  	SYSTEM_CONFIG_DIR="/etc"
+  	LOCAL_STATE_DIR="/var"
+  	VERSION="0.1"
+  
+  3. To run this program, use the following command:
+  
+  	$ python3 ./run.py
+
+================================================================================
+
+License:
+
 Copyright (C) 2013 Koichi Akabe <vbkaisetsu@gmail.com>
               2013 Yusuke Oda <yus.takara@gmail.com>
 

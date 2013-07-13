@@ -3,14 +3,14 @@
 # main.py
 #
 
-from settings import Options
-import utils
-from utils import *
-from system import System
+from ganglist.settings import Settings
+from ganglist import utils
+from ganglist.utils import *
+from ganglist.system import System
 
 
 # parse options
-def parseOptions():
+def parseOptions(defaultOptions):
 	from optparse import OptionParser, SUPPRESS_HELP
 
 	q = OptionParser(epilog="""
@@ -19,25 +19,25 @@ This GangList has my master's powers.
 
 	# add options into parser
 	q.add_option('-W', '--width', dest='width',
-		default=str(Options.DEFAULT_WIDTH),
-		help='graph width (default: %d)' % Options.DEFAULT_WIDTH,
+		default=str(defaultOptions.DEFAULT_WIDTH),
+		help='graph width (default: %d)' % defaultOptions.DEFAULT_WIDTH,
 		metavar='<INT>')
 	q.add_option('-H', '--height', dest='height',
-		default=str(Options.DEFAULT_HEIGHT),
-		help='graph height (default: %d)' % Options.DEFAULT_HEIGHT,
+		default=str(defaultOptions.DEFAULT_HEIGHT),
+		help='graph height (default: %d)' % defaultOptions.DEFAULT_HEIGHT,
 		metavar='<INT>')
 	q.add_option('-u', '--withusers', action="store_true", dest='showusers',
-		default=bool(Options.DEFAULT_SHOWUSERS),
+		default=bool(defaultOptions.DEFAULT_SHOWUSERS),
 		help='enable user list explicitly')
 	q.add_option('-n', '--nouser', action="store_false", dest='showusers',
-		default=bool(Options.DEFAULT_SHOWUSERS),
+		default=bool(defaultOptions.DEFAULT_SHOWUSERS),
 		help='disable user list explicitly')
 	q.add_option('-l', '--inline', action='store_true', dest='inline',
-		default=bool(Options.DEFAULT_INLINE),
+		default=bool(defaultOptions.DEFAULT_INLINE),
 		help='inline view')
 	q.add_option('-t', '--interval', dest='interval',
-		default=str(Options.DEFAULT_INTERVAL),
-		help='update interval [seconds] (default: %d)' % Options.DEFAULT_INTERVAL,
+		default=str(defaultOptions.DEFAULT_INTERVAL),
+		help='update interval [seconds] (default: %d)' % defaultOptions.DEFAULT_INTERVAL,
 		metavar='<INT>')
 
 	# eggs
@@ -59,7 +59,7 @@ This GangList has my master's powers.
 
 
 # assert options and convert data type if necessary
-def checkOptions(options):
+def checkOptions(options, defaultOptions):
 
 	def forceInt(options, name):
 		val = getattr(options, name)
@@ -83,9 +83,9 @@ def checkOptions(options):
 		forceBool(options, 'neubig')
 		forceBool(options, 'right')
 		forceBool(options, 'walk')
-		assertRange(options, 'width', Options.MIN_WIDTH, Options.MAX_WIDTH)
-		assertRange(options, 'height', Options.MIN_HEIGHT, Options.MAX_HEIGHT)
-		assertRange(options, 'interval', Options.MIN_INTERVAL, Options.MAX_INTERVAL)
+		assertRange(options, 'width', defaultOptions.MIN_WIDTH, defaultOptions.MAX_WIDTH)
+		assertRange(options, 'height', defaultOptions.MIN_HEIGHT, defaultOptions.MAX_HEIGHT)
+		assertRange(options, 'interval', defaultOptions.MIN_INTERVAL, defaultOptions.MAX_INTERVAL)
 	except ValueError as e:
 		Utils.perror(str(e))
 		return False
@@ -95,8 +95,14 @@ def checkOptions(options):
 
 def run():
 	# retrieve settings for command-line options
-	options, args = parseOptions()
-	if not checkOptions(options):
+	settings = Settings()
+	
+	if not settings.environment.HOSTS:
+		Utils.perror("Host is empty. You must specify at least one host.")
+		return
+
+	options, args = parseOptions(settings.options)
+	if not checkOptions(options, settings.options):
 		return
 
 	if options.neubig:
@@ -107,6 +113,6 @@ def run():
 		else:
 			Neubig.stand()
 	else:
-		sys = System(options)
+		sys = System(options, settings.environment)
 		sys.run()
 

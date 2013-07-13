@@ -1,0 +1,7 @@
+#!@PYTHON@
+# -*- coding: utf-8; indent-tabs-mode: t; tab-width: 4 -*-
+
+from ganglist import main
+
+if __name__ == "__main__":
+	main.run()
