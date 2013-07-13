@@ -98,7 +98,7 @@ def run():
 	settings = Settings()
 	
 	if not settings.environment.HOSTS:
-		Utils.perror("Host is empty. You should specify at least one host.")
+		Utils.perror("Host is empty. You must specify at least one host.")
 		return
 
 	options, args = parseOptions(settings.options)
