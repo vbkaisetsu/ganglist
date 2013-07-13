@@ -4,6 +4,14 @@ CUI frontend of Ganglia
 
 ================================================================================
 
+For Users:
+
+ To use this program, please copy ./config/ganglist.conf to /etc/ganglist.conf
+ on the system directory or ~/.ganglist.conf on your home directory as a hidden
+ file. Then, fill HOSTS to tell clasters to this program.
+
+================================================================================
+
 For Developers:
 
  If you use Debian (or Ubuntu), you can run this program immidiately by the
@@ -19,6 +27,8 @@ For Developers:
   	$ python3 ./run.py
 
 ================================================================================
+
+License:
 
 Copyright (C) 2013 Koichi Akabe <vbkaisetsu@gmail.com>
               2013 Yusuke Oda <yus.takara@gmail.com>
