@@ -8,8 +8,7 @@ import curses
 from datetime import datetime
 import time
 from xml.etree import ElementTree
-from settings import Environment as Env
-from utils import Utils
+from ganglist.utils import Utils
 
 
 class System:
@@ -53,8 +52,9 @@ class System:
 		return data[-1][1]
 
 
-	def __init__(self, options):
+	def __init__(self, options, env):
 		self.__options = options
+		self.__env = env
 		
 		self.__chart_h = self.__options.height
 		self.__chart_w = self.__options.width
@@ -114,9 +114,9 @@ class System:
 		for starty in range(0, self.__h - needed_h + 1, needed_h):
 			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
 				i += 1
-				if i == len(Env.HOSTS):
+				if i == len(self.__env.HOSTS):
 					break
-			if i == len(Env.HOSTS):
+			if i == len(self.__env.HOSTS):
 				break
 
 		if self.__mpp != i:
@@ -141,7 +141,7 @@ class System:
 			
 		# Down: next page
 		elif key == curses.KEY_DOWN:
-			if self.__mpp * (self.__page + 1) < len(Env.HOSTS):
+			if self.__mpp * (self.__page + 1) < len(self.__env.HOSTS):
 				self.__page += 1
 				self.__redraw = True
 
@@ -168,22 +168,22 @@ class System:
 
 	def __elapse(self):
 		if self.__timer == 0:
-			for m in Env.HOSTS:
+			for m in self.__env.HOSTS:
 				self.__window.addstr(self.__h - 1, 1, "Loading ...                                     "[:self.__w - 1])
 				self.__window.refresh()
 				try:
-					self.__cpu_num[m] = Utils.safeInt(System.__getRRD("%s/%s/cpu_num.rrd" % (Env.DATADIR, m))[-1][1])
-					self.__cpu_speed[m] = Utils.safeFloat(System.__getRRD("%s/%s/cpu_speed.rrd" % (Env.DATADIR, m))[-1][1])
-					self.__cpu_user[m] = System.__getRRD("%s/%s/cpu_user.rrd" % (Env.DATADIR, m))
-					self.__cpu_system[m] = System.__getRRD("%s/%s/cpu_system.rrd" % (Env.DATADIR, m))
+					self.__cpu_num[m] = Utils.safeInt(System.__getRRD("%s/%s/cpu_num.rrd" % (self.__env.DATADIR, m))[-1][1])
+					self.__cpu_speed[m] = Utils.safeFloat(System.__getRRD("%s/%s/cpu_speed.rrd" % (self.__env.DATADIR, m))[-1][1])
+					self.__cpu_user[m] = System.__getRRD("%s/%s/cpu_user.rrd" % (self.__env.DATADIR, m))
+					self.__cpu_system[m] = System.__getRRD("%s/%s/cpu_system.rrd" % (self.__env.DATADIR, m))
 
-					self.__mem_buffers[m] = System.__getRRD("%s/%s/mem_buffers.rrd" % (Env.DATADIR, m))
-					self.__mem_cached[m] = System.__getRRD("%s/%s/mem_cached.rrd" % (Env.DATADIR, m))
-					self.__mem_free[m] = System.__getRRD("%s/%s/mem_free.rrd" % (Env.DATADIR, m))
-					self.__mem_total[m] = System.__getRRD("%s/%s/mem_total.rrd" % (Env.DATADIR, m))
+					self.__mem_buffers[m] = System.__getRRD("%s/%s/mem_buffers.rrd" % (self.__env.DATADIR, m))
+					self.__mem_cached[m] = System.__getRRD("%s/%s/mem_cached.rrd" % (self.__env.DATADIR, m))
+					self.__mem_free[m] = System.__getRRD("%s/%s/mem_free.rrd" % (self.__env.DATADIR, m))
+					self.__mem_total[m] = System.__getRRD("%s/%s/mem_total.rrd" % (self.__env.DATADIR, m))
 
-					self.__cpu_topuser[m] = System.__getProcData("%s/%s/cpu_topuser" % (Env.DATADIR, m))
-					self.__mem_topuser[m] = System.__getProcData("%s/%s/mem_topuser" % (Env.DATADIR, m))
+					self.__cpu_topuser[m] = System.__getProcData("%s/%s/cpu_topuser" % (self.__env.DATADIR, m))
+					self.__mem_topuser[m] = System.__getProcData("%s/%s/mem_topuser" % (self.__env.DATADIR, m))
 				except ElementTree.ParseError:
 					return False
 				except IOError:
@@ -310,7 +310,7 @@ class System:
 		
 		for starty in range(0, self.__h - needed_h - 1, needed_h):
 			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
-				hostname = Env.HOSTS[i]
+				hostname = self.__env.HOSTS[i]
 
 				self.__window.addstr(starty + 0, startx, "".join([" "] * needed_w))
 				self.__window.addstr(starty + 0, startx + int((needed_w - len(hostname)) / 2), hostname)
@@ -330,10 +330,10 @@ class System:
 				starttime, endtime = self.__drawStatus(startx, starty, now, step, hostname)
 				
 				i += 1
-				if i == len(Env.HOSTS):
+				if i == len(self.__env.HOSTS):
 					break
 
-			if i == len(Env.HOSTS):
+			if i == len(self.__env.HOSTS):
 				break
 
 		starttimestr = datetime.fromtimestamp(starttime).strftime('%Y-%m-%d %H:%M:%S')

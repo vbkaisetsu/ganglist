@@ -3,31 +3,78 @@
 # settings.py
 #
 
+import configparser
+from ganglist import config
+
+
 class Options:
-	# default values for command-line options
-	DEFAULT_WIDTH = 30
-	DEFAULT_HEIGHT = 5
-	DEFAULT_SHOWUSERS = True
-	DEFAULT_INLINE = False
 
-	# minimum values for command-line options
-	MIN_WIDTH = 1
-	MIN_HEIGHT = 1
+	def __init__(self):
+		# default values for command-line options
+		self.DEFAULT_WIDTH = 30
+		self.DEFAULT_HEIGHT = 5
+		self.DEFAULT_SHOWUSERS = True
+		self.DEFAULT_INLINE = False
 
-	# maximum values for command-line options
-	MAX_WIDTH = 100
-	MAX_HEIGHT = 100
+		# minimum values for command-line options
+		self.MIN_WIDTH = 1
+		self.MIN_HEIGHT = 1
+
+		# maximum values for command-line options
+		self.MAX_WIDTH = 100
+		self.MAX_HEIGHT = 100
 
 
 class Environment:
-	# data directory
-	DATADIR = '/project/nakamura-lab01/ganglist'
 
-	# host list
-	HOSTS = [
-		"ahcclust01.naist.jp", "ahcclust02.naist.jp", "ahcclust03.naist.jp",
-		"ahcclust04.naist.jp", "ahcclust05.naist.jp", "ahcclust06.naist.jp",
-		"ahcclust07.naist.jp", "ahcclust08.naist.jp", "ahcclust09.naist.jp",
-		"ahcclust10.naist.jp", "ahcclust11.naist.jp", "ahcclust12.naist.jp",
-	]
+	def __init__(self):
+		# data directory
+		self.DATADIR = config.LOCAL_STATE_DIR + "/log/ganglist"
+
+		# host list
+		self.HOSTS = []
+
+
+class Settings:
+
+	def __init__(self):
+	
+		import os
+
+		self.options = Options()
+		self.environment = Environment()
+
+		HOME_DIR = os.environ["HOME"]		
+		CONF_BASENAME = "ganglist.conf"
+		
+		conffile = configparser.ConfigParser()
+		
+		if os.path.exists(config.SYSTEM_CONFIG_DIR + "/" + CONF_BASENAME):
+			conffile.read(config.SYSTEM_CONFIG_DIR)
+		if os.path.exists(HOME_DIR + "/." + CONF_BASENAME):
+			conffile.read(HOME_DIR + "/." + CONF_BASENAME)
+
+		if "Environment" in conffile:
+			if "DEFAULT_WIDTH" in conffile["Options"]:
+				self.options.DEFAULT_WIDTH = conffile["Options"].getint("DEFAULT_WIDTH")
+			if "DEFAULT_HEIGHT" in conffile["Options"]:
+				self.options.DEFAULT_HEIGHT = conffile["Options"].getint("DEFAULT_HEIGHT")
+			if "DEFAULT_SHOWUSERS" in conffile["Options"]:
+				self.options.DEFAULT_SHOWUSERS = conffile["Options"].getboolean("DEFAULT_SHOWUSERS")
+			if "DEFAULT_INLINE" in conffile["Options"]:
+				self.options.DEFAULT_INLINE = conffile["Options"].getboolean("DEFAULT_INLINE")
+			if "MIN_WIDTH" in conffile["Options"]:
+				self.options.MIN_WIDTH = conffile["Options"].getint("MIN_WIDTH")
+			if "MIN_HEIGHT" in conffile["Options"]:
+				self.options.MIN_HEIGHT = conffile["Options"].getint("MIN_HEIGHT")
+			if "MAX_WIDTH" in conffile["Options"]:
+				self.options.MAX_WIDTH = conffile["Options"].getint("MAX_WIDTH")
+			if "MAX_HEIGHT" in conffile["Options"]:
+				self.options.MAX_HEIGHT = conffile["Options"].getint("MAX_HEIGHT")
+
+		if "Environment" in conffile:
+			if "DATADIR" in conffile["Environment"]:
+				self.environment.DATADIR = conffile["Environment"]["DATADIR"]
+			if "HOSTS" in conffile["Environment"]:
+				self.environment.HOSTS = conffile["Environment"]["HOSTS"].split()
 

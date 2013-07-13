@@ -10,14 +10,16 @@ AM_PATH_PYTHON(3.1)
 #IT_PROG_INTLTOOL([0.35.0])
 
 AM_INIT_AUTOMAKE([1.11])
-#AC_CONFIG_MACRO_DIR([m4])
-#AS_AC_EXPAND(DATADIR, $datadir)
+AC_CONFIG_MACRO_DIR([m4])
+AS_AC_EXPAND(SYSCONFDIR, $sysconfdir)
+AS_AC_EXPAND(LOCALSTATEDIR, $localstatedir)
 
 AC_CONFIG_FILES([
 Makefile
 bin/Makefile
 bin/ganglist
 ganglist/Makefile
+ganglist/config.py
 ])
 
 AC_OUTPUT
