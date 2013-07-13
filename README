@@ -4,6 +4,22 @@ CUI frontend of Ganglia
 
 ================================================================================
 
+For Developers:
+
+ If you use Debian (or Ubuntu), you can run this program immidiately by the
+ following step:
+
+  1. Create ./run.py with the following code:
+  
+  	from ganglist import main
+  	main.run()
+  
+  2. To run this program, use the following command:
+  
+  	$ python3 ./run.py
+
+================================================================================
+
 Copyright (C) 2013 Koichi Akabe <vbkaisetsu@gmail.com>
               2013 Yusuke Oda <yus.takara@gmail.com>
 
