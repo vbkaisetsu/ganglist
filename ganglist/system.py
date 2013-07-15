@@ -18,41 +18,41 @@ class System:
 
 
 	@staticmethod
-	def __timeScaleToStep(timescale):
+	def __timeScaleToStep(timescale, chartWidth):
 		if timescale == 0:
-			return 60 # 30 mins
+			return 1800 / chartWidth # 30 mins
 		elif timescale == 1:
-			return 240 # 2 hours
+			return 7200 / chartWidth # 2 hours
 		elif timescale == 2:
-			return 1440 # 12 hours
+			return 43200 / chartWidth # 12 hours
 		elif timescale == 3:
-			return 11520 # 4 days
+			return 345600 / chartWidth # 4 days
 		elif timescale == 4:
-			return 86400 # 30 days
+			return 2592000 / chartWidth # 30 days
 		else:
 			raise ValueError
 
 
 	@staticmethod
-	def __stepToStr(step):
-		if step < 1:
+	def __secondsToStr(seconds):
+		if seconds < 1:
 			raise ValueError
-		elif step == 1:
-			return '%d second' % (step * 30)
-		step //= 2
-		if step == 1:
+		elif seconds == 1:
+			return '%d second' % seconds
+		seconds //= 60
+		if seconds == 1:
 			return '1 minute'
-		elif step < 60:
-			return '%d minutes' % step
-		step //= 60
-		if step == 1:
+		elif seconds < 60:
+			return '%d minutes' % seconds
+		seconds //= 60
+		if seconds == 1:
 			return '1 hour'
-		elif step < 24:
-			return '%d hours' % step
-		step //= 24
-		if step == 1:
+		elif seconds < 24:
+			return '%d hours' % seconds
+		seconds //= 24
+		if seconds == 1:
 			return '1 day'
-		return '%d days' % step
+		return '%d days' % seconds
 
 
 	@staticmethod
@@ -365,7 +365,7 @@ class System:
 				#self.__window.addstr(starty + 0, startx, " " * needed_w)
 				self.__window.addstr(starty + 0, startx, hostname.center(needed_w))
 
-				step = System.__timeScaleToStep(self.__timescale)
+				step = System.__timeScaleToStep(self.__timescale, self.__chart_w)
 
 				# each statuses
 				self.__drawStatus(startx, starty, now, step, hostname)
@@ -391,8 +391,8 @@ class System:
 
 		now = int(time.mktime(datetime.now().timetuple()))
 		now -= now % 60
-		step = System.__timeScaleToStep(self.__timescale)
-		start = now - step * (self.__chart_w - 1)
+		step = System.__timeScaleToStep(self.__timescale, self.__chart_w)
+		start = now - step * self.__chart_w
 
 		if self.__options.inline:
 			self.__drawInlines(now, step)
@@ -401,7 +401,7 @@ class System:
 
 		startstr = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
 		nowstr = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
-		stepstr = System.__stepToStr(step)
+		stepstr = System.__secondsToStr(step * self.__chart_w)
 
 		self.__printFooter("%s - %s (%s)" % (startstr, nowstr, stepstr))
 		self.__refresh()
