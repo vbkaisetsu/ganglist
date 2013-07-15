@@ -220,7 +220,7 @@ class System:
 	def __elapse(self):
 		if self.__timer == 0:
 			for m in self.__env.HOSTS:
-				self.__printFooter("Loading ...")
+				self.__printFooter(_("Loading ..."))
 				self.__refresh()
 				try:
 					self.__cpu_num[m] = Utils.safeInt(System.__getRRD("%s/%s/cpu_num.rrd" % (self.__env.DATADIR, m))[-1][1])
