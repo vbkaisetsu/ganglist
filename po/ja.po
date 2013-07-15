@@ -1,0 +1,93 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Koichi Akabe <vbkaisetsu@gmail.com>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ganglist trunk\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-07-15 16:42+0900\n"
+"PO-Revision-Date: 2013-07-15 15:59+0900\n"
+"Last-Translator: Koichi Akabe <vbkaisetsu@gmail.com>\n"
+"Language-Team: Japanese <lp-l10n-ja@lists.launchpad.net>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../ganglist/main.py:20
+msgid ""
+"\n"
+"This GangList has my master's powers.\n"
+msgstr ""
+"\n"
+"この GangList には私の師匠のパワーがあります。\n"
+
+#: ../ganglist/main.py:27
+#, python-format
+msgid "graph width (default: %d)"
+msgstr "グラフの幅 (規定値: %d)"
+
+#: ../ganglist/main.py:31
+#, python-format
+msgid "graph height (default: %d)"
+msgstr "グラフの高さ (規定値: %d)"
+
+#: ../ganglist/main.py:35
+msgid "enable user list explicitly"
+msgstr "ユーザー一覧の明示的な有効化"
+
+#: ../ganglist/main.py:38
+msgid "disable user list explicitly"
+msgstr "ユーザー一覧の明示的な無効化"
+
+#: ../ganglist/main.py:41
+msgid "inline view"
+msgstr "インライン表示"
+
+#: ../ganglist/main.py:44
+#, python-format
+msgid "update interval [seconds] (default: %d)"
+msgstr "更新間隔 [秒] (規定値: %d)"
+
+#: ../ganglist/main.py:71
+#, python-format
+msgid "Option \"%s\" must be integer."
+msgstr "オプション \"%s\" は整数でなければなりません。"
+
+#: ../ganglist/main.py:80
+#, python-format
+msgid "Option \"%(var)s\" must be: %(min)d <= %(var)s <= %(max)d."
+msgstr ""
+"オプション \"%(var)s\" の範囲は %(min)d <= %(var)s <= %(max)d でなければなり"
+"ません。"
+
+#: ../ganglist/main.py:105
+msgid "Host is empty. You must specify at least one host."
+msgstr "ホストが空です。少なくとも1つホストを指定する必要があります。"
+
+#: ../ganglist/system.py:43
+#, python-format
+msgid "%d second"
+msgid_plural "%d seconds"
+msgstr[0] "%d 秒"
+
+#: ../ganglist/system.py:46
+#, python-format
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d 分"
+
+#: ../ganglist/system.py:49
+#, python-format
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d 時間"
+
+#: ../ganglist/system.py:51
+#, python-format
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d 日"

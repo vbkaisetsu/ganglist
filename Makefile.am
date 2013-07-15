@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
-SUBDIRS = bin ganglist
+SUBDIRS = bin ganglist po
 
 EXTRA_DIST = \
 	README \
@@ -10,12 +10,12 @@ EXTRA_DIST = \
 	AUTHORS \
 	INSTALL \
 	NEWS \
-	#$(INTLTOOL_FILES)
+	$(INTLTOOL_FILES)
 
-#DISTCLEANFILES = intltool-extract \
-#	intltool-merge \
-#	intltool-update \
-#	po/.intltool-merge-cache
+DISTCLEANFILES = intltool-extract \
+	intltool-merge \
+	intltool-update \
+	po/.intltool-merge-cache
 
 dist-hook:
 	@if test -d "$(top_srcdir)/.bzr";								\

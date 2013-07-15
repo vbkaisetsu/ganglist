@@ -8,36 +8,40 @@ from ganglist import utils
 from ganglist.utils import *
 from ganglist.system import System
 
+import gettext
+from gettext import gettext as _
+gettext.textdomain("ganglist")
+
 
 # parse options
 def parseOptions(defaultOptions):
 	from optparse import OptionParser, SUPPRESS_HELP
 
-	q = OptionParser(epilog="""
+	q = OptionParser(epilog=_("""
 This GangList has my master's powers.
-""")
+"""))
 
 	# add options into parser
 	q.add_option('-W', '--width', dest='width',
 		default=str(defaultOptions.DEFAULT_WIDTH),
-		help='graph width (default: %d)' % defaultOptions.DEFAULT_WIDTH,
+		help=_('graph width (default: %d)') % defaultOptions.DEFAULT_WIDTH,
 		metavar='<INT>')
 	q.add_option('-H', '--height', dest='height',
 		default=str(defaultOptions.DEFAULT_HEIGHT),
-		help='graph height (default: %d)' % defaultOptions.DEFAULT_HEIGHT,
+		help=_('graph height (default: %d)') % defaultOptions.DEFAULT_HEIGHT,
 		metavar='<INT>')
 	q.add_option('-u', '--withusers', action="store_true", dest='showusers',
 		default=bool(defaultOptions.DEFAULT_SHOWUSERS),
-		help='enable user list explicitly')
+		help=_('enable user list explicitly'))
 	q.add_option('-n', '--nouser', action="store_false", dest='showusers',
 		default=bool(defaultOptions.DEFAULT_SHOWUSERS),
-		help='disable user list explicitly')
+		help=_('disable user list explicitly'))
 	q.add_option('-l', '--inline', action='store_true', dest='inline',
 		default=bool(defaultOptions.DEFAULT_INLINE),
-		help='inline view')
+		help=_('inline view'))
 	q.add_option('-t', '--interval', dest='interval',
 		default=str(defaultOptions.DEFAULT_INTERVAL),
-		help='update interval [seconds] (default: %d)' % defaultOptions.DEFAULT_INTERVAL,
+		help=_('update interval [seconds] (default: %d)') % defaultOptions.DEFAULT_INTERVAL,
 		metavar='<INT>')
 
 	# eggs
@@ -64,7 +68,7 @@ def checkOptions(options, defaultOptions):
 	def forceInt(options, name):
 		val = getattr(options, name)
 		if not val.isdigit():
-			raise ValueError('Option "%s" must be integer.' % name)
+			raise ValueError(_('Option "%s" must be integer.') % name)
 		setattr(options, name, int(val))
 	
 	def forceBool(options, name):
@@ -73,7 +77,7 @@ def checkOptions(options, defaultOptions):
 	def assertRange(options, name, minval, maxval):
 		val = getattr(options, name)
 		if val < minval or val > maxval:
-			raise ValueError('Option "%s" must be: %d <= %s <= %d.' % (name, minval, name, maxval))
+			raise ValueError(_('Option "%(var)s" must be: %(min)d <= %(var)s <= %(max)d.') % {"var": name, "min": minval, "max": maxval})
 	
 	try:
 		forceInt(options, 'width')
@@ -98,7 +102,7 @@ def run():
 	settings = Settings()
 	
 	if not settings.environment.HOSTS:
-		Utils.perror("Host is empty. You must specify at least one host.")
+		Utils.perror(_("Host is empty. You must specify at least one host."))
 		return
 
 	options, args = parseOptions(settings.options)
