@@ -10,6 +10,8 @@ import time
 from xml.etree import ElementTree
 from ganglist.utils import Utils
 
+from gettext import gettext as _
+from gettext import ngettext
 
 class System:
 
@@ -37,22 +39,16 @@ class System:
 	def __secondsToStr(seconds):
 		if seconds < 1:
 			raise ValueError
-		elif seconds == 1:
-			return '%d second' % seconds
+		if seconds < 60:
+			return ngettext('%d second', '%d seconds', seconds) % seconds
 		seconds //= 60
-		if seconds == 1:
-			return '1 minute'
-		elif seconds < 60:
-			return '%d minutes' % seconds
+		if seconds < 60:
+			return ngettext('%d minute', '%d minutes', seconds) % seconds
 		seconds //= 60
-		if seconds == 1:
-			return '1 hour'
-		elif seconds < 24:
-			return '%d hours' % seconds
+		if seconds < 24:
+			return ngettext('%d hour', '%d hours', seconds) % seconds
 		seconds //= 24
-		if seconds == 1:
-			return '1 day'
-		return '%d days' % seconds
+		return ngettext('%d day', '%d days', seconds) % seconds
 
 
 	@staticmethod
@@ -224,7 +220,7 @@ class System:
 	def __elapse(self):
 		if self.__timer == 0:
 			for m in self.__env.HOSTS:
-				self.__printFooter("Loading ...")
+				self.__printFooter(_("Loading ..."))
 				self.__refresh()
 				try:
 					self.__cpu_num[m] = Utils.safeInt(System.__getRRD("%s/%s/cpu_num.rrd" % (self.__env.DATADIR, m))[-1][1])
