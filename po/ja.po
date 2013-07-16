@@ -29,12 +29,12 @@ msgstr ""
 #: ../ganglist/main.py:27
 #, python-format
 msgid "graph width (default: %d)"
-msgstr "グラフの幅 (規定値: %d)"
+msgstr "グラフの幅 (既定値: %d)"
 
 #: ../ganglist/main.py:31
 #, python-format
 msgid "graph height (default: %d)"
-msgstr "グラフの高さ (規定値: %d)"
+msgstr "グラフの高さ (既定値: %d)"
 
 #: ../ganglist/main.py:35
 msgid "enable user list explicitly"
@@ -51,7 +51,7 @@ msgstr "インライン表示"
 #: ../ganglist/main.py:44
 #, python-format
 msgid "update interval [seconds] (default: %d)"
-msgstr "更新間隔 [秒] (規定値: %d)"
+msgstr "更新間隔 [秒] (既定値: %d)"
 
 #: ../ganglist/main.py:71
 #, python-format
@@ -73,25 +73,25 @@ msgstr "ホストが空です。少なくとも1つホストを指定する必�
 #, python-format
 msgid "%d second"
 msgid_plural "%d seconds"
-msgstr[0] "%d 秒"
+msgstr[0] "%d秒"
 
 #: ../ganglist/system.py:46
 #, python-format
 msgid "%d minute"
 msgid_plural "%d minutes"
-msgstr[0] "%d 分"
+msgstr[0] "%d分"
 
 #: ../ganglist/system.py:49
 #, python-format
 msgid "%d hour"
 msgid_plural "%d hours"
-msgstr[0] "%d 時間"
+msgstr[0] "%d時間"
 
 #: ../ganglist/system.py:51
 #, python-format
 msgid "%d day"
 msgid_plural "%d days"
-msgstr[0] "%d 日"
+msgstr[0] "%d日"
 
 #: ../ganglist/system.py:223
 msgid "Loading ..."
