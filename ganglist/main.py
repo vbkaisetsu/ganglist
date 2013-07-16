@@ -7,6 +7,7 @@ from ganglist.settings import Settings
 from ganglist import utils
 from ganglist.utils import *
 from ganglist.system import System
+from ganglist import config
 
 import gettext
 from gettext import gettext as _
@@ -17,7 +18,7 @@ gettext.textdomain("ganglist")
 def parseOptions(defaultOptions):
 	from optparse import OptionParser, SUPPRESS_HELP
 
-	q = OptionParser(epilog=_("""
+	q = OptionParser(version="ganglist %s" % config.VERSION, epilog=_("""
 This GangList has my master's powers.
 """))
 
