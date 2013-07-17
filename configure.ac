@@ -1,0 +1,26 @@
+AC_PREREQ([2.64])
+AC_INIT(ganglist, 0.1)
+AM_INIT_AUTOMAKE
+AM_PATH_PYTHON(3.1)
+
+GETTEXT_PACKAGE=ganglist
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
+AM_GLIB_GNU_GETTEXT
+IT_PROG_INTLTOOL([0.35.0])
+
+AM_INIT_AUTOMAKE([1.11])
+AC_CONFIG_MACRO_DIR([m4])
+AS_AC_EXPAND(SYSCONFDIR, $sysconfdir)
+AS_AC_EXPAND(LOCALSTATEDIR, $localstatedir)
+
+AC_CONFIG_FILES([
+Makefile
+bin/Makefile
+bin/ganglist
+ganglist/Makefile
+ganglist/config.py
+po/Makefile.in
+])
+
+AC_OUTPUT

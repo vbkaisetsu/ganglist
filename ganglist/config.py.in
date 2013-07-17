@@ -1,0 +1,5 @@
+# -*- coding: utf-8; indent-tabs-mode: t; tab-width: 4 -*-
+
+SYSTEM_CONFIG_DIR="@SYSCONFDIR@"
+LOCAL_STATE_DIR="@LOCALSTATEDIR@"
+VERSION="@VERSION@"
