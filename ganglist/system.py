@@ -4,19 +4,17 @@
 #
 
 
-import curses
-from datetime import datetime
 import time
+from datetime import datetime
 from xml.etree import ElementTree
-from ganglist.utils import Utils
-
 from gettext import gettext as _
 from gettext import ngettext
 
+from ganglist.utils import Utils
+from ganglist.screen import Screen
+
+
 class System:
-
-
-	__TIMEOUT = 10
 
 
 	@staticmethod
@@ -99,12 +97,7 @@ class System:
 
 
 	def __initial(self):
-		self.__window = curses.initscr()
-		curses.noecho()
-		curses.cbreak()
-		curses.raw()
-		self.__window.keypad(1)
-		self.__window.timeout(System.__TIMEOUT)
+		self.__scr = Screen(self.__options.coloring)
 
 		self.__timescale = 0
 		self.__timer = 0
@@ -125,56 +118,24 @@ class System:
 		self.__cpu_topuser = {}
 		self.__mem_topuser = {}
 
-		self.__h = 0
-		self.__w = 0
-
-		self.__coloring = self.__options.coloring and curses.has_colors()
-		if self.__coloring:
-			curses.start_color()
-			curses.init_pair(1, 1, 1)
-			curses.init_pair(2, 2, 2)
-			curses.init_pair(3, 3, 3)
-
 
 	def __final(self):
-		self.__window.keypad(0)
-		curses.noraw()
-		curses.nocbreak()
-		curses.echo()
-		curses.endwin()
-
-
-	def __printFooter(self, text):
-		if (self.__coloring):
-			self.__window.attrset(curses.color_pair(0))
-		self.__window.addstr(self.__h - 1, 0, ' ' * (self.__w - 1))
-		self.__window.addstr(self.__h - 1, 1, text)
-
-
-	def __print(self, y, x, text, colorno=0):
-		if (self.__coloring):
-			self.__window.attrset(curses.color_pair(colorno))
-		self.__window.addstr(y, x, text)
-	
-
-	def __refresh(self):
-		self.__window.move(self.__h - 1, 0)
-		self.__window.refresh()
+		self.__scr.final()
+		self.__scr = None
 
 
 	# get machines per page
 	def __initPage(self):
 		i = 0
-		self.__h, self.__w = self.__window.getmaxyx()
 
 		needed_h = self.__chart_h + (3 if self.__showusers else 0) + 5
 		needed_w = self.__chart_w * 2 + 3
 
-		if self.__h < needed_h + 2 or self.__w < needed_w:
+		if self.__scr.height() < needed_h + 2 or self.__scr.width() < needed_w:
 			return False
 
-		for starty in range(0, self.__h - needed_h + 1, needed_h):
-			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
+		for starty in range(0, self.__scr.height() - needed_h + 1, needed_h):
+			for startx in range(0, self.__scr.width() - needed_w + 1, needed_w + 2):
 				i += 1
 				if i == len(self.__env.HOSTS):
 					break
@@ -190,7 +151,7 @@ class System:
 
 
 	def __keystroke(self):
-		key = self.__window.getch();
+		key = self.__scr.getch();
 
 		# Q: quit
 		if key == ord('q'):
@@ -201,30 +162,30 @@ class System:
 			self.__timer = 0
 
 		# Resize
-		elif key == curses.KEY_RESIZE:
+		elif key == 'RESIZE':
 			if not self.__initPage():
 				return False
 
 		# Down: next page
-		elif key == curses.KEY_DOWN:
+		elif key == 'DOWN':
 			if self.__mpp * (self.__page + 1) < len(self.__env.HOSTS):
 				self.__page += 1
 				self.__redraw = True
 
 		# Up: previous page
-		elif key == curses.KEY_UP:
+		elif key == 'UP':
 			if self.__page > 0:
 				self.__page -= 1
 				self.__redraw = True
 
 		# Left: zoom-out
-		elif key == curses.KEY_LEFT:
+		elif key == 'LEFT':
 			if self.__timescale < 4:
 				self.__timescale += 1
 				self.__redraw = True
 
 		# Right: zoom-in
-		elif key == curses.KEY_RIGHT:
+		elif key == 'RIGHT':
 			if self.__timescale > 0:
 				self.__timescale -= 1
 				self.__redraw = True
@@ -235,8 +196,8 @@ class System:
 	def __elapse(self):
 		if self.__timer == 0:
 			for m in self.__env.HOSTS:
-				self.__printFooter(_("Loading ..."))
-				self.__refresh()
+				self.__scr.writeFooter(_("Loading ..."))
+				self.__scr.refresh()
 				try:
 					self.__cpu_num[m] = Utils.safeInt(System.__getRRD("%s/%s/cpu_num.rrd" % (self.__env.DATADIR, m))[-1][1])
 					self.__cpu_speed[m] = Utils.safeFloat(System.__getRRD("%s/%s/cpu_speed.rrd" % (self.__env.DATADIR, m))[-1][1])
@@ -259,7 +220,7 @@ class System:
 
 		# go ahead
 		self.__timer += 1
-		if self.__timer >= self.__options.interval * 1000 // System.__TIMEOUT:
+		if self.__timer >= self.__options.interval * 1000 // Screen.timeout():
 			self.__timer = 0
 
 		return True
@@ -289,45 +250,45 @@ class System:
 		cpu_title = cpu_title[:self.__chart_w]
 		mem_title = mem_title[:self.__chart_w]
 
-		self.__print(y + 1, x, rowText(hspace, hspace, ' '))
-		self.__print(y + 1, x + 1, cpu_title.center(self.__chart_w))
-		self.__print(y + 1, x + self.__chart_w + 2, mem_title.center(self.__chart_w))
-		self.__window.addstr(y + 2, x, rowText(hline, hline, '|'))
+		self.__scr.write(y + 1, x, rowText(hspace, hspace, ' '))
+		self.__scr.write(y + 1, x + 1, cpu_title.center(self.__chart_w))
+		self.__scr.write(y + 1, x + self.__chart_w + 2, mem_title.center(self.__chart_w))
+		self.__scr.write(y + 2, x, rowText(hline, hline, '|'))
 
 		for i in range(self.__chart_h):
-			self.__print(y + 3 + i, x, rowText(hspace, hspace, '|'))
+			self.__scr.write(y + 3 + i, x, rowText(hspace, hspace, '|'))
 			
-		self.__print(y + 3 + self.__chart_h, x, rowText(hline, hline, '|'))
+		self.__scr.write(y + 3 + self.__chart_h, x, rowText(hline, hline, '|'))
 		
 		for j in range(self.__chart_w):
 			val1 = System.__getRRDValue(cpu_system, current + (j - self.__chart_w + 1) * step, step)
 			val2 = System.__getRRDValue(cpu_user, current + (j - self.__chart_w + 1) * step, step)
 			if val1 < 0 or val2 < 0:
 				for i in range(self.__chart_h):
-					self.__print(y + 3 + i, x + 1 + j, "?")
+					self.__scr.write(y + 3 + i, x + 1 + j, "?")
 				continue
 			val2 += val1
 
 			for i in range(self.__chart_h):
 				if val2 > i / self.__chart_h * 100:
-					self.__print(y + self.__chart_h + 2 - i, x + 1 + j, "#", 1)
+					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "#", 1)
 			for i in range(self.__chart_h):
 				if val1 > i / self.__chart_h * 100:
-					self.__print(y + self.__chart_h + 2 - i, x + 1 + j, "@", 2)
+					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "@", 2)
 
 		i = 0
 
 		if self.__showusers:
-			self.__print(y + 4 + self.__chart_h, x, rowText(hspace, hspace, '|'))
-			self.__print(y + 5 + self.__chart_h, x, rowText(hspace, hspace, '|'))
-			self.__print(y + 6 + self.__chart_h, x, rowText(hline, hline, '|'))
+			self.__scr.write(y + 4 + self.__chart_h, x, rowText(hspace, hspace, '|'))
+			self.__scr.write(y + 5 + self.__chart_h, x, rowText(hspace, hspace, '|'))
+			self.__scr.write(y + 6 + self.__chart_h, x, rowText(hline, hline, '|'))
 
 			for u in cpu_topuser:
 				mu = u[:]
 				mu[1] += "%"
 				mu[2] = mu[2].split("/")[-1]
 				s = " ".join(mu)
-				self.__print(y + self.__chart_h + 4 + i, x + 2, s[:self.__chart_w - 2])
+				self.__scr.write(y + self.__chart_h + 4 + i, x + 2, s[:self.__chart_w - 2])
 				i += 1
 
 		for j in range(self.__chart_w):
@@ -337,7 +298,7 @@ class System:
 			val3 = System.__getRRDValue(mem_buffers, current + (j - self.__chart_w + 1) * step, step)
 			if total < 0 or val1 < 0 or val2 < 0 or val3 < 0:
 				for i in range(self.__chart_h):
-					self.__print(y + 3 + i, x + self.__chart_w + 2 + j, "?")
+					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, "?")
 				continue
 
 			used = (total - val1) / total
@@ -346,9 +307,9 @@ class System:
 			for i in range(self.__chart_h):
 				r = (self.__chart_h - i) / self.__chart_h
 				if r < active:
-					self.__print(y + 3 + i, x + self.__chart_w + 2 + j, "#", 1)
+					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, "#", 1)
 				elif r < used:
-					self.__print(y + 3 + i, x + self.__chart_w + 2 + j, ".", 3)
+					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, ".", 3)
 	
 		i = 0
 
@@ -358,7 +319,7 @@ class System:
 				mu[1] += "%"
 				mu[2] = mu[2].split("/")[-1]
 				s = " ".join(mu)
-				self.__print(y + self.__chart_h + 4 + i, x + self.__chart_w + 3, s[:self.__chart_w - 2])
+				self.__scr.write(y + self.__chart_h + 4 + i, x + self.__chart_w + 3, s[:self.__chart_w - 2])
 				i += 1
 
 
@@ -368,11 +329,11 @@ class System:
 
 		hn = self.__mpp * self.__page
 
-		for starty in range(0, self.__h - needed_h - 1, needed_h):
-			for startx in range(0, self.__w - needed_w + 1, needed_w + 2):
+		for starty in range(0, self.__scr.height() - needed_h - 1, needed_h):
+			for startx in range(0, self.__scr.width() - needed_w + 1, needed_w + 2):
 				hostname = self.__env.HOSTS[hn]
 
-				self.__print(starty + 0, startx, hostname.center(needed_w))
+				self.__scr.write(starty + 0, startx, hostname.center(needed_w))
 
 				step = System.__timeScaleToStep(self.__timescale, self.__chart_w)
 
@@ -387,22 +348,22 @@ class System:
 				break
 
 		uy = starty + self.__chart_h + (3 if self.__showusers else 0) + 5
-		self.__print(uy, 1, '[ # ]', 1)
-		self.__print(uy, 1 + 6, 'user')
-		self.__print(uy, 1 + 12, '[ @ ]', 2)
-		self.__print(uy, 1 + 18, 'sys')
-		self.__print(uy, self.__chart_w + 2, "[ # ]", 1)
-		self.__print(uy, self.__chart_w + 2 + 6, "user")
-		self.__print(uy, self.__chart_w + 2 + 12, "[ . ]", 3)
-		self.__print(uy, self.__chart_w + 2 + 18, "cache/buff")
+		self.__scr.write(uy, 1, '[ # ]', 1)
+		self.__scr.write(uy, 1 + 6, 'user')
+		self.__scr.write(uy, 1 + 12, '[ @ ]', 2)
+		self.__scr.write(uy, 1 + 18, 'sys')
+		self.__scr.write(uy, self.__chart_w + 2, "[ # ]", 1)
+		self.__scr.write(uy, self.__chart_w + 2 + 6, "user")
+		self.__scr.write(uy, self.__chart_w + 2 + 12, "[ . ]", 3)
+		self.__scr.write(uy, self.__chart_w + 2 + 18, "cache/buff")
 	
 
 	def __drawInlines(self, now, step):
-		self.__print(0, 0, 'Sorry, this option is not implemented yet.');
+		self.__scr.write(0, 0, 'Sorry, this option is not implemented yet.');
 
 
 	def __draw(self):
-		self.__window.erase()
+		self.__scr.erase()
 
 		now = int(time.mktime(datetime.now().timetuple()))
 		now -= now % 60
@@ -418,8 +379,8 @@ class System:
 		nowstr = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
 		stepstr = System.__secondsToStr(step * self.__chart_w)
 
-		self.__printFooter("%s - %s (%s)" % (startstr, nowstr, stepstr))
-		self.__refresh()
+		self.__scr.writeFooter("%s - %s (%s)" % (startstr, nowstr, stepstr))
+		self.__scr.refresh()
 
 
 	def __mainloop(self):
@@ -439,20 +400,13 @@ class System:
 			if not self.__keystroke():
 				return
 
-			try:
-				# update
-				if not self.__elapse():
-					return
+			# update
+			if not self.__elapse():
+				return
 
-				# redraw
-				if self.__redraw:
-					self.__draw()
-			except curses.error:
-				# when resizing occured with drawing the screen,
-				# the program throws this error.
-				# since the screen will be refreshed when receiving next KEY_RESIZE message,
-				# this error may be ignored.
-				pass
+			# redraw
+			if self.__redraw:
+				self.__draw()
 
 
 	def run(self):
