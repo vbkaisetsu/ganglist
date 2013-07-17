@@ -16,6 +16,7 @@ class Options:
 		self.DEFAULT_INTERVAL = 60
 		self.DEFAULT_SHOWUSERS = True
 		self.DEFAULT_INLINE = False
+		self.DEFAULT_COLORING = False
 
 		# minimum values for command-line options
 		self.MIN_WIDTH = 1

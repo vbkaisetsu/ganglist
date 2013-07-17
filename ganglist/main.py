@@ -102,16 +102,23 @@ def checkOptions(options, defaultOptions):
 	return True
 		
 
+def checkEnvironment(env):
+	if not env.HOSTS:
+		Utils.perror(_("Host is empty. You must specify at least one host."))
+		return False
+	
+	return True
+
+
 def run():
 	# retrieve settings for command-line options
 	settings = Settings()
 	
-	if not settings.environment.HOSTS:
-		Utils.perror(_("Host is empty. You must specify at least one host."))
-		return
-
 	options, args = parseOptions(settings.options)
 	if not checkOptions(options, settings.options):
+		return
+
+	if not checkEnvironment(settings.environment):
 		return
 
 	if options.neubig:
