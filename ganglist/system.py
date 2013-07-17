@@ -385,28 +385,25 @@ class System:
 
 	def __mainloop(self):
 
-		firstloop = True
+		self.__redraw = False
+
+		# initial update
+		if not self.__initPage():
+			return
 
 		while True:
-			self.__redraw = False
-
-			# initial update
-			if firstloop:
-				firstloop = False
-				if not self.__initPage():
-					return
-
 			# process key stroke
 			if not self.__keystroke():
-				return
+				break
 
 			# update
 			if not self.__elapse():
-				return
+				break
 
 			# redraw
 			if self.__redraw:
 				self.__draw()
+				self.__redraw = False
 
 
 	def run(self):
