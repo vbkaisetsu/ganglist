@@ -9,6 +9,7 @@ from datetime import datetime
 import time
 from xml.etree import ElementTree
 from ganglist.utils import Utils
+from urllib.request import urlopen
 
 from gettext import gettext as _
 from gettext import ngettext
@@ -53,7 +54,10 @@ class System:
 
 	@staticmethod
 	def __getProcData(filename):
-		fp = open(filename, "r")
+		if "://" in filename:
+			fp = urlopen(filename).read().decode("utf-8").strip().split("\n")
+		else:
+			fp = open(filename, "r")
 		lst = []
 		for l in fp:
 			spl = l.split()
@@ -65,7 +69,10 @@ class System:
 	# parse xml files dumped from rrds
 	@staticmethod
 	def __getRRD(filename):
-		tree = ElementTree.parse(filename)
+		if "://" in filename:
+			tree = ElementTree.parse(urlopen(filename))
+		else:
+			tree = ElementTree.parse(filename)
 		elem = tree.getroot()
 		rootstep = int(elem.find(".//step").text)
 		lastupdate = int(elem.find(".//lastupdate").text)
