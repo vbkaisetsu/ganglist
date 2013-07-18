@@ -234,10 +234,10 @@ class System:
 
 			for i in range(self.__chart_h):
 				if val2 > i / self.__chart_h * 100:
-					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "#", 1)
+					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "#", 'USER')
 			for i in range(self.__chart_h):
 				if val1 > i / self.__chart_h * 100:
-					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "@", 2)
+					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "@", 'SYSTEM')
 
 		i = 0
 
@@ -270,9 +270,9 @@ class System:
 			for i in range(self.__chart_h):
 				r = (self.__chart_h - i) / self.__chart_h
 				if r < active:
-					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, "#", 1)
+					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, "#", 'USER')
 				elif r < used:
-					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, ".", 3)
+					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, ".", 'CACHE')
 	
 		i = 0
 
@@ -311,13 +311,13 @@ class System:
 				break
 
 		uy = starty + self.__chart_h + (3 if self.__showusers else 0) + 5
-		self.__scr.write(uy, 1, '[ # ]', 1)
+		self.__scr.write(uy, 1, '[ # ]', 'USER')
 		self.__scr.write(uy, 1 + 6, 'user')
-		self.__scr.write(uy, 1 + 12, '[ @ ]', 2)
+		self.__scr.write(uy, 1 + 12, '[ @ ]', 'SYSTEM')
 		self.__scr.write(uy, 1 + 18, 'sys')
-		self.__scr.write(uy, self.__chart_w + 2, "[ # ]", 1)
+		self.__scr.write(uy, self.__chart_w + 2, "[ # ]", 'USER')
 		self.__scr.write(uy, self.__chart_w + 2 + 6, "user")
-		self.__scr.write(uy, self.__chart_w + 2 + 12, "[ . ]", 3)
+		self.__scr.write(uy, self.__chart_w + 2 + 12, "[ . ]", 'CACHE')
 		self.__scr.write(uy, self.__chart_w + 2 + 18, "cache/buff")
 	
 
