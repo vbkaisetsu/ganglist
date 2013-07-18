@@ -16,6 +16,7 @@ class Options:
 		self.DEFAULT_INTERVAL = 60
 		self.DEFAULT_SHOWUSERS = True
 		self.DEFAULT_INLINE = False
+		self.DEFAULT_COLORING = False
 
 		# minimum values for command-line options
 		self.MIN_WIDTH = 1
@@ -40,6 +41,7 @@ class Environment:
 
 class Settings:
 
+
 	def __init__(self):
 	
 		import os
@@ -53,11 +55,11 @@ class Settings:
 		conffile = configparser.ConfigParser()
 		
 		if os.path.exists(config.SYSTEM_CONFIG_DIR + "/" + CONF_BASENAME):
-			conffile.read(config.SYSTEM_CONFIG_DIR)
+			conffile.read(config.SYSTEM_CONFIG_DIR + "/" + CONF_BASENAME)
 		if os.path.exists(HOME_DIR + "/." + CONF_BASENAME):
 			conffile.read(HOME_DIR + "/." + CONF_BASENAME)
 
-		if "Environment" in conffile:
+		if "Options" in conffile:
 			if "DEFAULT_WIDTH" in conffile["Options"]:
 				self.options.DEFAULT_WIDTH = conffile["Options"].getint("DEFAULT_WIDTH")
 			if "DEFAULT_HEIGHT" in conffile["Options"]:

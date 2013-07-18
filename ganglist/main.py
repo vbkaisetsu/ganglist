@@ -31,6 +31,10 @@ This GangList has my master's powers.
 		default=str(defaultOptions.DEFAULT_HEIGHT),
 		help=_('graph height (default: %d)') % defaultOptions.DEFAULT_HEIGHT,
 		metavar='<INT>')
+	q.add_option('-t', '--interval', dest='interval',
+		default=str(defaultOptions.DEFAULT_INTERVAL),
+		help=_('update interval [seconds] (default: %d)') % defaultOptions.DEFAULT_INTERVAL,
+		metavar='<INT>')
 	q.add_option('-u', '--withusers', action="store_true", dest='showusers',
 		default=bool(defaultOptions.DEFAULT_SHOWUSERS),
 		help=_('enable user list explicitly'))
@@ -40,10 +44,9 @@ This GangList has my master's powers.
 	q.add_option('-l', '--inline', action='store_true', dest='inline',
 		default=bool(defaultOptions.DEFAULT_INLINE),
 		help=_('inline view'))
-	q.add_option('-t', '--interval', dest='interval',
-		default=str(defaultOptions.DEFAULT_INTERVAL),
-		help=_('update interval [seconds] (default: %d)') % defaultOptions.DEFAULT_INTERVAL,
-		metavar='<INT>')
+	q.add_option('-c', '--color', action='store_true', dest='coloring',
+		default=bool(defaultOptions.DEFAULT_COLORING),
+		help=_('enable coloring'))
 
 	# eggs
 	q.add_option('--neubig', dest='neubig',
@@ -85,6 +88,7 @@ def checkOptions(options, defaultOptions):
 		forceInt(options, 'height')
 		forceInt(options, 'interval')
 		forceBool(options, 'showusers')
+		forceBool(options, 'coloring')
 		forceBool(options, 'neubig')
 		forceBool(options, 'right')
 		forceBool(options, 'walk')
@@ -98,16 +102,23 @@ def checkOptions(options, defaultOptions):
 	return True
 		
 
+def checkEnvironment(env):
+	if not env.HOSTS:
+		Utils.perror(_("Host is empty. You must specify at least one host."))
+		return False
+	
+	return True
+
+
 def run():
 	# retrieve settings for command-line options
 	settings = Settings()
 	
-	if not settings.environment.HOSTS:
-		Utils.perror(_("Host is empty. You must specify at least one host."))
-		return
-
 	options, args = parseOptions(settings.options)
 	if not checkOptions(options, settings.options):
+		return
+
+	if not checkEnvironment(settings.environment):
 		return
 
 	if options.neubig:
