@@ -6,13 +6,12 @@
 
 import time
 from datetime import datetime
-from xml.etree import ElementTree
-from urllib.request import urlopen
 
 from gettext import gettext as _
 from gettext import ngettext
 
 from ganglist.utils import Utils
+from ganglist.data import Data
 from ganglist.screen import Screen
 
 
@@ -49,55 +48,12 @@ class System:
 			return ngettext('%d hour', '%d hours', seconds) % seconds
 		seconds //= 24
 		return ngettext('%d day', '%d days', seconds) % seconds
+	
 
-
-	@staticmethod
-	def __getProcData(filename):
-		if "://" in filename:
-			fp = urlopen(filename).read().decode("utf-8").strip().split("\n")
-		else:
-			fp = open(filename, "r")
-		lst = []
-		for l in fp:
-			spl = l.split()
-			spl[2] = spl[2].split("/")[-1]
-			lst.append(spl)
-		return lst
-
-
-	# parse xml files dumped from rrds
-	@staticmethod
-	def __getRRD(filename):
-		if "://" in filename:
-			tree = ElementTree.parse(urlopen(filename))
-		else:
-			tree = ElementTree.parse(filename)
-		elem = tree.getroot()
-		rootstep = int(elem.find(".//step").text)
-		lastupdate = int(elem.find(".//lastupdate").text)
-		dataset = {}
-		for e in elem.findall(".//rra"):
-			step = int(e.find(".//pdp_per_row").text) * rootstep
-			dataset.update({lastupdate - i * step: Utils.safeFloat(val.text) for i, val in enumerate(reversed(e.findall(".//v")))})
-		return sorted(dataset.items(), key=lambda x: x[0])
-
-
-	@staticmethod
-	def __getRRDValue(data, time, period):
-		valsum = 0
-		cnt = 0
-		for i in range(len(data)):
-			if time - period <= data[i][0]:
-				cnt += 1
-				valsum += data[i][1]
-				if time <= data[i][0]:
-					return valsum / cnt
-		return data[-1][1]
-
-
-	def __init__(self, options, env):
+	def __init__(self, options, env, colorMap):
 		self.__options = options
 		self.__env = env
+		self.__colorMap = colorMap
 
 		self.__chart_h = self.__options.height
 		self.__chart_w = self.__options.width
@@ -105,7 +61,7 @@ class System:
 
 
 	def __initial(self):
-		self.__scr = Screen(self.__options.coloring)
+		self.__scr = Screen(self.__options.coloring, self.__colorMap)
 
 		self.__timescale = 0
 		self.__timer = 0
@@ -207,18 +163,18 @@ class System:
 				self.__scr.writeFooter(_("Loading ..."))
 				self.__scr.refresh()
 				try:
-					self.__cpu_num[m] = Utils.safeInt(System.__getRRD("%s/%s/cpu_num.rrd" % (self.__env.DATADIR, m))[-1][1])
-					self.__cpu_speed[m] = Utils.safeFloat(System.__getRRD("%s/%s/cpu_speed.rrd" % (self.__env.DATADIR, m))[-1][1])
-					self.__cpu_user[m] = System.__getRRD("%s/%s/cpu_user.rrd" % (self.__env.DATADIR, m))
-					self.__cpu_system[m] = System.__getRRD("%s/%s/cpu_system.rrd" % (self.__env.DATADIR, m))
+					self.__cpu_num[m] = Utils.safeInt(Data.getRRD("%s/%s/cpu_num.rrd" % (self.__env.DATADIR, m))[-1][1])
+					self.__cpu_speed[m] = Utils.safeFloat(Data.getRRD("%s/%s/cpu_speed.rrd" % (self.__env.DATADIR, m))[-1][1])
+					self.__cpu_user[m] = Data.getRRD("%s/%s/cpu_user.rrd" % (self.__env.DATADIR, m))
+					self.__cpu_system[m] = Data.getRRD("%s/%s/cpu_system.rrd" % (self.__env.DATADIR, m))
 
-					self.__mem_buffers[m] = System.__getRRD("%s/%s/mem_buffers.rrd" % (self.__env.DATADIR, m))
-					self.__mem_cached[m] = System.__getRRD("%s/%s/mem_cached.rrd" % (self.__env.DATADIR, m))
-					self.__mem_free[m] = System.__getRRD("%s/%s/mem_free.rrd" % (self.__env.DATADIR, m))
-					self.__mem_total[m] = System.__getRRD("%s/%s/mem_total.rrd" % (self.__env.DATADIR, m))
+					self.__mem_buffers[m] = Data.getRRD("%s/%s/mem_buffers.rrd" % (self.__env.DATADIR, m))
+					self.__mem_cached[m] = Data.getRRD("%s/%s/mem_cached.rrd" % (self.__env.DATADIR, m))
+					self.__mem_free[m] = Data.getRRD("%s/%s/mem_free.rrd" % (self.__env.DATADIR, m))
+					self.__mem_total[m] = Data.getRRD("%s/%s/mem_total.rrd" % (self.__env.DATADIR, m))
 
-					self.__cpu_topuser[m] = System.__getProcData("%s/%s/cpu_topuser" % (self.__env.DATADIR, m))
-					self.__mem_topuser[m] = System.__getProcData("%s/%s/mem_topuser" % (self.__env.DATADIR, m))
+					self.__cpu_topuser[m] = Data.getProcData("%s/%s/cpu_topuser" % (self.__env.DATADIR, m))
+					self.__mem_topuser[m] = Data.getProcData("%s/%s/mem_topuser" % (self.__env.DATADIR, m))
 				except ElementTree.ParseError:
 					return False
 				except IOError:
@@ -269,8 +225,8 @@ class System:
 		self.__scr.write(y + 3 + self.__chart_h, x, rowText(hline, hline, '|'))
 		
 		for j in range(self.__chart_w):
-			val1 = System.__getRRDValue(cpu_system, current + (j - self.__chart_w + 1) * step, step)
-			val2 = System.__getRRDValue(cpu_user, current + (j - self.__chart_w + 1) * step, step)
+			val1 = Data.getRRDValue(cpu_system, current + (j - self.__chart_w + 1) * step, step)
+			val2 = Data.getRRDValue(cpu_user, current + (j - self.__chart_w + 1) * step, step)
 			if val1 < 0 or val2 < 0:
 				for i in range(self.__chart_h):
 					self.__scr.write(y + 3 + i, x + 1 + j, "?")
@@ -279,10 +235,10 @@ class System:
 
 			for i in range(self.__chart_h):
 				if val2 > i / self.__chart_h * 100:
-					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "#", 1)
+					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "#", 'USER')
 			for i in range(self.__chart_h):
 				if val1 > i / self.__chart_h * 100:
-					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "@", 2)
+					self.__scr.write(y + self.__chart_h + 2 - i, x + 1 + j, "@", 'SYSTEM')
 
 		i = 0
 
@@ -300,10 +256,10 @@ class System:
 				i += 1
 
 		for j in range(self.__chart_w):
-			total = System.__getRRDValue(mem_total, current + (j - self.__chart_w + 1) * step, step)
-			val1 = System.__getRRDValue(mem_free, current + (j - self.__chart_w + 1) * step, step)
-			val2 = System.__getRRDValue(mem_cached, current + (j - self.__chart_w + 1) * step, step)
-			val3 = System.__getRRDValue(mem_buffers, current + (j - self.__chart_w + 1) * step, step)
+			total = Data.getRRDValue(mem_total, current + (j - self.__chart_w + 1) * step, step)
+			val1 = Data.getRRDValue(mem_free, current + (j - self.__chart_w + 1) * step, step)
+			val2 = Data.getRRDValue(mem_cached, current + (j - self.__chart_w + 1) * step, step)
+			val3 = Data.getRRDValue(mem_buffers, current + (j - self.__chart_w + 1) * step, step)
 			if total < 0 or val1 < 0 or val2 < 0 or val3 < 0:
 				for i in range(self.__chart_h):
 					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, "?")
@@ -315,9 +271,9 @@ class System:
 			for i in range(self.__chart_h):
 				r = (self.__chart_h - i) / self.__chart_h
 				if r < active:
-					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, "#", 1)
+					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, "#", 'USER')
 				elif r < used:
-					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, ".", 3)
+					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, ".", 'CACHE')
 	
 		i = 0
 
@@ -356,13 +312,13 @@ class System:
 				break
 
 		uy = starty + self.__chart_h + (3 if self.__showusers else 0) + 5
-		self.__scr.write(uy, 1, '[ # ]', 1)
+		self.__scr.write(uy, 1, '[ # ]', 'USER')
 		self.__scr.write(uy, 1 + 6, 'user')
-		self.__scr.write(uy, 1 + 12, '[ @ ]', 2)
+		self.__scr.write(uy, 1 + 12, '[ @ ]', 'SYSTEM')
 		self.__scr.write(uy, 1 + 18, 'sys')
-		self.__scr.write(uy, self.__chart_w + 2, "[ # ]", 1)
+		self.__scr.write(uy, self.__chart_w + 2, "[ # ]", 'USER')
 		self.__scr.write(uy, self.__chart_w + 2 + 6, "user")
-		self.__scr.write(uy, self.__chart_w + 2 + 12, "[ . ]", 3)
+		self.__scr.write(uy, self.__chart_w + 2 + 12, "[ . ]", 'CACHE')
 		self.__scr.write(uy, self.__chart_w + 2 + 18, "cache/buff")
 	
 

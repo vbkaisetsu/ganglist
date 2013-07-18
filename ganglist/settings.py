@@ -16,7 +16,7 @@ class Options:
 		self.DEFAULT_INTERVAL = 60
 		self.DEFAULT_SHOWUSERS = True
 		self.DEFAULT_INLINE = False
-		self.DEFAULT_COLORING = False
+		self.DEFAULT_COLORING = True
 
 		# minimum values for command-line options
 		self.MIN_WIDTH = 1
@@ -48,6 +48,7 @@ class Settings:
 
 		self.options = Options()
 		self.environment = Environment()
+		self.colorMap = {} # {string name: int colorno}
 
 		HOME_DIR = os.environ["HOME"]		
 		CONF_BASENAME = "ganglist.conf"
@@ -88,4 +89,12 @@ class Settings:
 				self.environment.DATADIR = conffile["Environment"]["DATADIR"]
 			if "HOSTS" in conffile["Environment"]:
 				self.environment.HOSTS = conffile["Environment"]["HOSTS"].split()
+
+		if "Colors" in conffile:
+			if "USER" in conffile["Colors"]:
+				self.colorMap["USER"] = int(conffile["Colors"]["USER"])
+			if "SYSTEM" in conffile["Colors"]:
+				self.colorMap["SYSTEM"] = int(conffile["Colors"]["SYSTEM"])
+			if "CACHE" in conffile["Colors"]:
+				self.colorMap["CACHE"] = int(conffile["Colors"]["CACHE"])
 

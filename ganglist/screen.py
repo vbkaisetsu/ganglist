@@ -14,10 +14,17 @@ class Screen:
 	# key mapping
 	__KEYMAP = {
 		curses.KEY_RESIZE: 'RESIZE',
-		curses.KEY_UP: 'UP',
-		curses.KEY_DOWN: 'DOWN',
-		curses.KEY_LEFT: 'LEFT',
-		curses.KEY_RIGHT: 'RIGHT'}
+		curses.KEY_UP:     'UP',
+		curses.KEY_DOWN:   'DOWN',
+		curses.KEY_LEFT:   'LEFT',
+		curses.KEY_RIGHT:  'RIGHT'}
+	
+	# color mapping
+	__COLORNUM = {
+		'DEFAULT': 0,
+		'USER':    1,
+		'SYSTEM':  2,
+		'CACHE':   3}
 
 	# timeout interval
 	__TIMEOUT = 10
@@ -31,7 +38,7 @@ class Screen:
 		return Screen.__TIMEOUT
 
 
-	def __init__(self, coloring):
+	def __init__(self, coloring, colorMap=None):
 		# check and set singleton object
 		if Screen.__obj is not None:
 			raise RuntimeError(_('Duplicate "Screen" object.'))
@@ -54,11 +61,33 @@ class Screen:
 		# color settings
 		if self.__coloring:
 			curses.start_color()
-			curses.init_pair(1, 1, 1)
-			curses.init_pair(2, 2, 2)
-			curses.init_pair(3, 3, 3)
+			
+			# default color mapping
+			for val in Screen.__COLORNUM.values():
+				if val == 0:
+					continue
+				curses.init_pair(val, val, val)
+
+			# optional color mapping
+			if colorMap is not None:
+				for key, val in colorMap.items():
+					if key in Screen.__COLORNUM:
+						curses.init_pair(Screen.__COLORNUM[key], val, val)
 
 	
+	def __updateSize(self):
+		self.__h, self.__w = self.__scr.getmaxyx()
+
+
+	def __setColor(self, name):
+		if not self.__coloring:
+			return
+		if not name in Screen.__COLORNUM:
+			name = 'DEFAULT'
+
+		self.__scr.attrset(curses.color_pair(Screen.__COLORNUM[name]))
+
+
 	# Users MUST call this method when they finish using this class
 	def final(self):
 		# finalize
@@ -70,10 +99,6 @@ class Screen:
 
 		# unset singleton object
 		__obj = None
-
-
-	def __updateSize(self):
-		self.__h, self.__w = self.__scr.getmaxyx()
 
 
 	def getch(self):
@@ -113,12 +138,11 @@ class Screen:
 			self.__scr.refresh()
 		except curses.error:
 			pass
+	
 
-
-	def write(self, y, x, text, colorno=0):
+	def write(self, y, x, text, colorName='DEFAULT'):
 		try:
-			if (self.__coloring):
-				self.__scr.attrset(curses.color_pair(colorno))
+			self.__setColor(colorName)
 			self.__scr.addstr(y, x, text)
 		except curses.error:
 			pass
@@ -126,8 +150,7 @@ class Screen:
 
 	def writeFooter(self, text):
 		try:
-			if (self.__coloring):
-				self.__scr.attrset(curses.color_pair(0))
+			self.__setColor('DEFAULT')
 			self.__scr.addstr(self.__h - 1, 0, ' ' * (self.__w - 1))
 			self.__scr.addstr(self.__h - 1, 1, text)
 		except curses.error:
