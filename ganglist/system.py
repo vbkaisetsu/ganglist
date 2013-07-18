@@ -50,9 +50,10 @@ class System:
 		return ngettext('%d day', '%d days', seconds) % seconds
 	
 
-	def __init__(self, options, env):
+	def __init__(self, options, env, colorMap):
 		self.__options = options
 		self.__env = env
+		self.__colorMap = colorMap
 
 		self.__chart_h = self.__options.height
 		self.__chart_w = self.__options.width
@@ -60,7 +61,7 @@ class System:
 
 
 	def __initial(self):
-		self.__scr = Screen(self.__options.coloring)
+		self.__scr = Screen(self.__options.coloring, self.__colorMap)
 
 		self.__timescale = 0
 		self.__timer = 0

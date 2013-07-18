@@ -129,6 +129,6 @@ def run():
 		else:
 			Neubig.stand()
 	else:
-		sys = System(options, settings.environment)
+		sys = System(options, settings.environment, settings.colorMap)
 		sys.run()
 
