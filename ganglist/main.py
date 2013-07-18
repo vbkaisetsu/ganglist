@@ -44,9 +44,9 @@ This GangList has my master's powers.
 	q.add_option('-l', '--inline', action='store_true', dest='inline',
 		default=bool(defaultOptions.DEFAULT_INLINE),
 		help=_('inline view'))
-	q.add_option('-c', '--color', action='store_true', dest='coloring',
+	q.add_option('--nocolor', action='store_false', dest='coloring',
 		default=bool(defaultOptions.DEFAULT_COLORING),
-		help=_('enable coloring'))
+		help=_('disable coloring'))
 
 	# eggs
 	q.add_option('--neubig', dest='neubig',
