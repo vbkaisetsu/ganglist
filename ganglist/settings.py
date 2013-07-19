@@ -32,15 +32,20 @@ class Settings:
 			conffile.read(HOME_DIR + "/." + CONF_BASENAME)
 
 		if "Options" in conffile:
+			# default values for command-line options
 			self.options.DEFAULT_WIDTH = conffile["Options"].getint("DEFAULT_WIDTH", 30)
 			self.options.DEFAULT_HEIGHT = conffile["Options"].getint("DEFAULT_HEIGHT", 5)
 			self.options.DEFAULT_INTERVAL = conffile["Options"].getint("DEFAULT_INTERVAL", 60)
 			self.options.DEFAULT_SHOWUSERS = conffile["Options"].getboolean("DEFAULT_SHOWUSERS", True)
 			self.options.DEFAULT_INLINE = conffile["Options"].getboolean("DEFAULT_INLINE", False)
 			self.options.DEFAULT_COLORING = conffile["Options"].getboolean("DEFAULT_COLORING", True)
+
+			# minimum values for command-line options
 			self.options.MIN_WIDTH = conffile["Options"].getint("MIN_WIDTH", 1)
 			self.options.MIN_HEIGHT = conffile["Options"].getint("MIN_HEIGHT", 1)
 			self.options.MIN_INTERVAL = conffile["Options"].getint("MIN_INTERVAL", 10)
+
+			# maximum values for command-line options
 			self.options.MAX_WIDTH = conffile["Options"].getint("MAX_WIDTH", 100)
 			self.options.MAX_HEIGHT = conffile["Options"].getint("MAX_HEIGHT", 100)
 			self.options.MAX_INTERVAL = conffile["Options"].getint("MAX_INTERVAL", 600)
