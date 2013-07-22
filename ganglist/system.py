@@ -6,6 +6,7 @@
 
 import time
 from datetime import datetime
+from xml.etree import ElementTree
 
 from gettext import gettext as _
 from gettext import ngettext
