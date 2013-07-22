@@ -134,13 +134,17 @@ class Neubig:
 
 
 	@staticmethod
-	def walk():
+	def walk(moon=False, mirror=False):
 		import curses, random, math
 		
 		tau = 0.003
 		
-		logo_left = Neubig.__shuffle(Neubig.__logo_left)
-		logo_right = Neubig.__shuffle(Neubig.__logo_right)
+		if moon:
+			logo_left = Neubig.__shuffle(Neubig.__logo_right)
+			logo_right = Neubig.__shuffle(Neubig.__logo_left)
+		else:
+			logo_left = Neubig.__shuffle(Neubig.__logo_left)
+			logo_right = Neubig.__shuffle(Neubig.__logo_right)
 		
 		window = curses.initscr() 
 		curses.noecho()
@@ -152,6 +156,10 @@ class Neubig:
 
 		h, w = window.getmaxyx()
 
+		if mirror:
+			w_real = w
+			w //= 2
+
 		state = 0
 		x = -47
 		y = int((h - 33) / 2)
@@ -159,6 +167,7 @@ class Neubig:
 		t = 0
 
 		logo = logo_right
+		logo_rev = logo_left
 
 		while True:
 			thr = 0.5 * (1 - math.exp(-tau * t))
@@ -179,6 +188,12 @@ class Neubig:
 					window.addstr(y + i, 0, line[-x:w-x])
 				else:
 					window.addstr(y + i, x, line[0:w-x])
+				if mirror:
+					x_rev = w_real - x - len(line)
+					if x_rev < w:
+						window.addstr(y + i, w, logo_rev[i][-x_rev+w:w_real-x_rev])
+					else:
+						window.addstr(y + i, x_rev, logo_rev[i][0:w_real-x_rev])
 
 			if 0 <= x and x < w - 47:
 				t += 1
@@ -201,10 +216,12 @@ class Neubig:
 			if state == 0:
 				x += 1
 				logo = logo_right
+				logo_rev = logo_left
 
 			if state == 2:
 				x -= 1
 				logo = logo_left
+				logo_rev = logo_right
 
 			if x == w or x == -47:
 				break

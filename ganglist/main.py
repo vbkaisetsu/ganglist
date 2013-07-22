@@ -55,7 +55,11 @@ This GangList has my master's powers.
 		action='store_true', default=False, help=SUPPRESS_HELP)
 	q.add_option('--walk', dest='walk',
 		action='store_true', default=False, help=SUPPRESS_HELP)
-	
+	q.add_option('--moon', dest='moon',
+		action='store_true', default=False, help=SUPPRESS_HELP)
+	q.add_option('--mirror', dest='mirror',
+		action='store_true', default=False, help=SUPPRESS_HELP)
+
 	# analyze
 	(options, args) = q.parse_args()
 
@@ -92,6 +96,8 @@ def checkOptions(options, defaultOptions):
 		forceBool(options, 'neubig')
 		forceBool(options, 'right')
 		forceBool(options, 'walk')
+		forceBool(options, 'moon')
+		forceBool(options, 'mirror')
 		assertRange(options, 'width', defaultOptions.MIN_WIDTH, defaultOptions.MAX_WIDTH)
 		assertRange(options, 'height', defaultOptions.MIN_HEIGHT, defaultOptions.MAX_HEIGHT)
 		assertRange(options, 'interval', defaultOptions.MIN_INTERVAL, defaultOptions.MAX_INTERVAL)
@@ -123,7 +129,7 @@ def run():
 
 	if options.neubig:
 		if options.walk:
-			Neubig.walk()
+			Neubig.walk(moon=options.moon, mirror=options.mirror)
 		elif options.right:
 			Neubig.rstand()
 		else:
