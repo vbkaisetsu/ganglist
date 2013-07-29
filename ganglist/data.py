@@ -22,8 +22,9 @@ class Data:
 		lst = []
 		for l in fp:
 			spl = l.split()
-			spl[2] = spl[2].split("/")[-1]
-			lst.append(spl)
+			if len(spl) == 3:
+				spl[2] = spl[2].split("/")[-1]
+				lst.append(spl)
 		return lst
 
 
