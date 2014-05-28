@@ -3,6 +3,7 @@
 # utils.py
 #
 
+import math
 
 class Utils:
 
@@ -17,20 +18,21 @@ class Utils:
 	# convert some data into corresponding integer value
 	# or -1 if cannot.
 	@staticmethod
-	def safeInt(data):
+	def safeInt(data, errval=-1):
 		try:
 			return int(data)
 		except ValueError:
-			return -1
+			return errval
 
 	# convert some data into corresponding float value
 	# or -1.0 if cannot.
 	@staticmethod
-	def safeFloat(data):
+	def safeFloat(data, errval=-1.0):
 		try:
-			return float(data)
+			val = float(data)
 		except ValueError:
-			return -1.0
+			return errval
+		return val if not math.isnan(val) else errval
 
 
 # He is our cool master

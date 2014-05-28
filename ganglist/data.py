@@ -22,9 +22,9 @@ class Data:
 		lst = []
 		for l in fp:
 			spl = l.split()
-			if len(spl) == 3 and spl[2]:
+			if len(spl) >= 3 and spl[2]:
 				spl[2] = spl[2].split("/")[-1]
-				lst.append(spl)
+				lst.append(spl[:3])
 		return lst
 
 
@@ -40,9 +40,11 @@ class Data:
 		lastupdate = int(elem.find(".//lastupdate").text)
 		dataset = {}
 		for e in elem.findall(".//rra"):
+			second_val = Utils.safeFloat(e.find(".//secondary_value").text)
+			prim_val = Utils.safeFloat(e.find(".//primary_value").text, second_val)
 			step = int(e.find(".//pdp_per_row").text) * rootstep
 			dataset.update({
-				lastupdate - i * step: Utils.safeFloat(val.text)
+				lastupdate - i * step: Utils.safeFloat(val.text, prim_val)
 				for i, val in enumerate(reversed(e.findall(".//v")))})
 		return sorted(dataset.items(), key=lambda x: x[0])
 
