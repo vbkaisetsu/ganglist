@@ -261,7 +261,7 @@ class System:
 			val1 = Data.getRRDValue(mem_free, current + (j - self.__chart_w + 1) * step, step)
 			val2 = Data.getRRDValue(mem_cached, current + (j - self.__chart_w + 1) * step, step)
 			val3 = Data.getRRDValue(mem_buffers, current + (j - self.__chart_w + 1) * step, step)
-			if total < 0 or val1 < 0 or val2 < 0 or val3 < 0:
+			if total <= 0 or val1 < 0 or val2 < 0 or val3 < 0:
 				for i in range(self.__chart_h):
 					self.__scr.write(y + 3 + i, x + self.__chart_w + 2 + j, "?")
 				continue
